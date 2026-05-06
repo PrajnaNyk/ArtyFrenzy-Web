@@ -1,0 +1,62 @@
+package com.art.artyfrenzy.service.serviceImpl;
+
+import com.art.artyfrenzy.model.Artwork;
+import com.art.artyfrenzy.repository.ArtworkRepository;
+import com.art.artyfrenzy.service.ArtworkService;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class ArtworkServiceImpl implements ArtworkService {
+
+    private final ArtworkRepository artworkRepository;
+
+    @Override
+    public List<Artwork> getAllArtworks() {
+        return artworkRepository.findAll();
+    }
+
+    @Override
+    public List<Artwork> getAvailableArtworks() {
+        return artworkRepository.findByAvailableTrue();
+    }
+
+    @Override
+    public Artwork getArtworkById(Long id) {
+        return artworkRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Artwork not found with id: " + id));
+    }
+
+    @Override
+    public List<Artwork> getArtworksByCategory(String category) {
+        return artworkRepository.findByCategory(category);
+    }
+
+    @Override
+    public Artwork createArtwork(Artwork artwork) {
+        return artworkRepository.save(artwork);
+    }
+
+    @Override
+    public Artwork updateArtwork(Long id, Artwork updatedArtwork) {
+        Artwork existing = getArtworkById(id);
+        existing.setTitle(updatedArtwork.getTitle());
+        existing.setArtist(updatedArtwork.getArtist());
+        existing.setPrice(updatedArtwork.getPrice());
+        existing.setCategory(updatedArtwork.getCategory());
+        existing.setDescription(updatedArtwork.getDescription());
+        existing.setImageUrl(updatedArtwork.getImageUrl());
+        existing.setTag(updatedArtwork.getTag());
+        existing.setAvailable(updatedArtwork.getAvailable());
+        return artworkRepository.save(existing);
+    }
+
+    @Override
+    public void deleteArtwork(Long id) {
+        artworkRepository.deleteById(id);
+    }
+}

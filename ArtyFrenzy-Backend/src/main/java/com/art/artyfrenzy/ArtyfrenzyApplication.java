@@ -9,5 +9,4 @@ public class ArtyfrenzyApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(ArtyfrenzyApplication.class, args);
 	}
-
 }
