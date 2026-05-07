@@ -1,0 +1,123 @@
+.recently-viewed-section {
+  padding: 60px 60px;
+  background: #F9F5EF;
+  border-top: 1px solid rgba(44,40,37,0.08);
+}
+
+.recently-viewed-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+
+.recently-viewed-eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #C9963A;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.recently-viewed-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 32px;
+  font-weight: 300;
+  color: #1C1917;
+}
+
+.recently-viewed-clear {
+  background: none;
+  border: 1.5px solid rgba(44,40,37,0.15);
+  color: #7C7168;
+  padding: 6px 16px;
+  border-radius: 50px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.recently-viewed-clear:hover {
+  border-color: #B5472A;
+  color: #B5472A;
+}
+
+.recently-viewed-scroll {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(44,40,37,0.15) transparent;
+}
+
+.recently-viewed-scroll::-webkit-scrollbar { height: 4px; }
+.recently-viewed-scroll::-webkit-scrollbar-track { background: transparent; }
+.recently-viewed-scroll::-webkit-scrollbar-thumb { background: rgba(44,40,37,0.15); border-radius: 2px; }
+
+.recently-viewed-card {
+  flex-shrink: 0;
+  width: 180px;
+  background: #FFFDF9;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(44,40,37,0.1);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.recently-viewed-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(28,25,23,0.1);
+}
+
+.recently-viewed-img {
+  height: 140px;
+  overflow: hidden;
+}
+
+.recently-viewed-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.recently-viewed-card:hover .recently-viewed-img img {
+  transform: scale(1.06);
+}
+
+.recently-viewed-info {
+  padding: 10px 12px;
+}
+
+.recently-viewed-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: #1C1917;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recently-viewed-artist {
+  font-size: 11px;
+  color: #7C7168;
+  margin-bottom: 4px;
+}
+
+.recently-viewed-price {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #C9963A;
+}
+
+@media (max-width: 768px) {
+  .recently-viewed-section { padding: 40px 20px; }
+  .recently-viewed-title { font-size: 24px; }
+}

@@ -2,6 +2,13 @@ import { useState, useEffect } from "react";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
 import AuthModal from "./auth/AuthModal";
 import "./App.css";
+import { WishlistProvider } from "./context/WishlistContext";
+import { RecentlyViewedProvider } from "./context/RecentlyViewedContext";
+import WishlistButton from "./components/WishlistButton";
+import RecentlyViewed from "./components/RecentlyViewed";
+import ReviewSection from "./components/ReviewSection";
+import WishlistPage from "./pages/WishlistPage";
+import ArtistProfile from "./pages/ArtistProfile";
 
 const artworks = [
   { id: 1, title: "Crimson Reverie", artist: "Meera Nair", price: 12500, category: "Abstract", image: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=600&q=80", tag: "Featured" },
@@ -262,7 +269,11 @@ function AppInner() {
 export default function App() {
   return (
     <AuthProvider>
-      <AppInner />
+      <WishlistProvider>
+        <RecentlyViewedProvider>
+          <AppInner />
+        </RecentlyViewedProvider>
+      </WishlistProvider>
     </AuthProvider>
   );
 }

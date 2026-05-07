@@ -1,0 +1,190 @@
+.artist-profile-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(28,25,23,0.75);
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease;
+}
+
+.artist-profile {
+  background: #F9F5EF;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  animation: scaleIn 0.25s ease;
+}
+
+.artist-profile-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+  background: rgba(249,245,239,0.9);
+  border: 1px solid rgba(44,40,37,0.15);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1C1917;
+  transition: all 0.2s;
+}
+
+.artist-profile-close:hover { background: #1C1917; color: #F9F5EF; }
+
+.artist-cover {
+  height: 160px;
+  border-radius: 20px 20px 0 0;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  padding: 0 32px;
+}
+
+.artist-avatar-wrap {
+  position: absolute;
+  bottom: -40px;
+  left: 32px;
+}
+
+.artist-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 36px;
+  font-weight: 600;
+  color: #F9F5EF;
+  border: 4px solid #F9F5EF;
+  box-shadow: 0 4px 20px rgba(28,25,23,0.15);
+}
+
+.artist-info { padding: 52px 32px 32px; }
+
+.artist-info-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.artist-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 32px;
+  font-weight: 400;
+  color: #1C1917;
+  margin-bottom: 4px;
+}
+
+.artist-location { font-size: 13px; color: #7C7168; }
+
+.artist-stats { display: flex; gap: 24px; }
+
+.artist-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.artist-stat-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  font-weight: 600;
+  color: #1C1917;
+  line-height: 1;
+}
+
+.artist-stat-label { font-size: 11px; color: #7C7168; text-transform: uppercase; letter-spacing: 0.06em; }
+
+.artist-tags { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+
+.artist-tag {
+  background: rgba(201,150,58,0.12);
+  color: #C9963A;
+  padding: 5px 14px;
+  border-radius: 50px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+/* Tabs */
+.artist-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid rgba(44,40,37,0.1);
+  margin-bottom: 28px;
+}
+
+.artist-tab {
+  background: none;
+  border: none;
+  padding: 10px 20px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: #7C7168;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 0.2s;
+}
+
+.artist-tab.active { color: #1C1917; border-bottom-color: #C9963A; font-weight: 500; }
+.artist-tab:hover { color: #1C1917; }
+
+/* Artworks grid */
+.artist-artworks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.artist-artwork-card {
+  background: #FFFDF9;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(44,40,37,0.08);
+  transition: transform 0.2s;
+}
+
+.artist-artwork-card:hover { transform: translateY(-3px); }
+
+.artist-artwork-img {
+  height: 160px;
+  position: relative;
+  overflow: hidden;
+}
+
+.artist-artwork-img img { width: 100%; height: 100%; object-fit: cover; }
+
+.artist-artwork-info { padding: 12px; }
+.artist-artwork-info h4 { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 400; color: #1C1917; margin-bottom: 2px; }
+.artist-artwork-info p { font-size: 11px; color: #7C7168; margin-bottom: 10px; }
+.artist-artwork-footer { display: flex; align-items: center; justify-content: space-between; }
+.artist-artwork-footer span { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 600; color: #1C1917; }
+
+/* About */
+.artist-about { display: flex; flex-direction: column; gap: 24px; }
+.artist-bio { font-size: 15px; color: #2C2825; line-height: 1.8; }
+.artist-social h4 { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; color: #1C1917; margin-bottom: 12px; }
+.artist-social p { font-size: 14px; color: #7C7168; margin-bottom: 6px; }
+
+/* Exhibitions */
+.artist-exhibitions { display: flex; flex-direction: column; gap: 14px; }
+.exhibition-item { display: flex; align-items: center; gap: 12px; font-size: 15px; color: #2C2825; padding: 14px 16px; background: #FFFDF9; border-radius: 10px; border: 1px solid rgba(44,40,37,0.08); }
+.exhibition-dot { color: #C9963A; font-size: 12px; }

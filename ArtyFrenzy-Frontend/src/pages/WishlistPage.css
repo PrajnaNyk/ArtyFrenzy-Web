@@ -1,0 +1,198 @@
+.wishlist-page {
+  padding: 40px 60px;
+  min-height: 60vh;
+  background: #F9F5EF;
+}
+
+.wishlist-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 40px;
+}
+
+.wishlist-eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #C9963A;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.wishlist-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 42px;
+  font-weight: 300;
+  color: #1C1917;
+  margin-bottom: 4px;
+}
+
+.wishlist-count {
+  font-size: 14px;
+  color: #7C7168;
+}
+
+.wishlist-clear-btn {
+  background: none;
+  border: 1.5px solid rgba(44,40,37,0.15);
+  color: #7C7168;
+  padding: 8px 18px;
+  border-radius: 50px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.wishlist-clear-btn:hover {
+  border-color: #B5472A;
+  color: #B5472A;
+}
+
+.wishlist-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  gap: 16px;
+  text-align: center;
+  color: #7C7168;
+}
+
+.wishlist-empty span {
+  font-size: 56px;
+  color: #C9963A;
+}
+
+.wishlist-empty h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  font-weight: 300;
+  color: #1C1917;
+}
+
+.wishlist-empty p {
+  font-size: 15px;
+  color: #7C7168;
+}
+
+.wishlist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 28px;
+}
+
+.wishlist-card {
+  background: #FFFDF9;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(44,40,37,0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.wishlist-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(28,25,23,0.12);
+}
+
+.wishlist-card-img {
+  position: relative;
+  height: 240px;
+  overflow: hidden;
+}
+
+.wishlist-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.wishlist-card:hover .wishlist-card-img img {
+  transform: scale(1.05);
+}
+
+.wishlist-remove-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(249,245,239,0.9);
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7C7168;
+  transition: all 0.2s;
+}
+
+.wishlist-remove-btn:hover {
+  background: #1C1917;
+  color: #F9F5EF;
+}
+
+.wishlist-card-info { padding: 18px; }
+
+.wishlist-card-category {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #C9963A;
+  font-weight: 500;
+}
+
+.wishlist-card-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: #1C1917;
+  margin: 6px 0 4px;
+}
+
+.wishlist-card-artist {
+  font-size: 13px;
+  color: #7C7168;
+  margin-bottom: 14px;
+}
+
+.wishlist-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.wishlist-card-price {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1C1917;
+}
+
+.wishlist-add-cart-btn {
+  background: transparent;
+  border: 1.5px solid #1C1917;
+  color: #1C1917;
+  padding: 6px 14px;
+  border-radius: 50px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.wishlist-add-cart-btn:hover {
+  background: #1C1917;
+  color: #F9F5EF;
+}
+
+@media (max-width: 768px) {
+  .wishlist-page { padding: 32px 20px; }
+  .wishlist-title { font-size: 30px; }
+}
