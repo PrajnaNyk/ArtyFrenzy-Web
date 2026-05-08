@@ -2,6 +2,7 @@ package com.art.artyfrenzy.config;
 
 import com.art.artyfrenzy.repository.UserRepository;
 import com.art.artyfrenzy.security.JwtAuthFilter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -42,11 +43,21 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
+                        // Public
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/artworks/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/artists/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
+                        // Protected
+                        .requestMatchers(HttpMethod.POST, "/api/reviews/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/reviews/**").authenticated()
+                        .requestMatchers("/api/wishlist/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/artworks/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/artworks/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/artworks/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/artists/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/artists/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/artists/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
