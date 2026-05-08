@@ -1,15 +1,15 @@
 import { useState, useEffect } from "react";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
-import AuthModal from "./auth/AuthModal";
-import "./App.css";
 import { WishlistProvider } from "./context/WishlistContext";
-import { RecentlyViewedProvider } from "./context/RecentlyViewedContext";
+import { RecentlyViewedProvider, useRecentlyViewed } from "./context/RecentlyViewedContext";
 import WishlistButton from "./components/WishlistButton";
 import RecentlyViewed from "./components/RecentlyViewed";
 import ReviewSection from "./components/ReviewSection";
 import WishlistPage from "./pages/WishlistPage";
 import ArtistProfile from "./pages/ArtistProfile";
+import "./App.css";
 
+// ── Artworks Data ──
 const artworks = [
   { id: 1, title: "Crimson Reverie", artist: "Meera Nair", price: 12500, category: "Abstract", image: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=600&q=80", tag: "Featured" },
   { id: 2, title: "Golden Horizons", artist: "Arjun Pillai", price: 8900, category: "Landscape", image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=600&q=80", tag: "New" },
@@ -23,8 +23,177 @@ const artworks = [
 
 const categories = ["All", "Abstract", "Landscape", "Impressionism", "Modern", "Floral", "Portrait"];
 
+// ── Login Form ──
+function LoginForm({ onSwitchToRegister, onClose }) {
+  const { login } = useAuth();
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showPass, setShowPass] = useState(false);
+
+  const handleChange = (e) => { setForm({ ...form, [e.target.name]: e.target.value }); setError(""); };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!form.email || !form.password) { setError("Please fill in all fields."); return; }
+    setLoading(true);
+    await new Promise(r => setTimeout(r, 1000));
+    login({ name: "Art Lover", email: form.email }, "demo-token-123");
+    setLoading(false);
+    onClose();
+  };
+
+  return (
+    <div className="auth-page">
+      <div className="auth-left">
+        <div className="auth-art-stack">
+          <div className="auth-art auth-art-1"><img src={artworks[0].image} alt="" /></div>
+          <div className="auth-art auth-art-2"><img src={artworks[4].image} alt="" /></div>
+          <div className="auth-art auth-art-3"><img src={artworks[2].image} alt="" /></div>
+        </div>
+        <div className="auth-left-content">
+          <div className="auth-logo"><span className="auth-logo-star">✦</span><span className="auth-logo-text">ArtyFrenzy</span></div>
+          <p className="auth-left-quote">"Every artist dips his brush in his own soul."</p>
+          <p className="auth-left-author">— Henry Ward Beecher</p>
+        </div>
+      </div>
+      <div className="auth-right">
+        <div className="auth-form-wrap">
+          <p className="auth-eyebrow">✦ Welcome back</p>
+          <h2 className="auth-title">Sign in to your<br />collection</h2>
+          <p className="auth-sub">Don't have an account? <button className="auth-switch-btn" onClick={onSwitchToRegister}>Create one</button></p>
+          <form className="auth-form" onSubmit={handleSubmit}>
+            {error && <div className="auth-error">{error}</div>}
+            <div className="auth-field">
+              <label className="auth-label">Email address</label>
+              <input className="auth-input" type="email" name="email" placeholder="you@example.com" value={form.email} onChange={handleChange} />
+            </div>
+            <div className="auth-field">
+              <label className="auth-label">Password</label>
+              <div className="auth-input-wrap">
+                <input className="auth-input" type={showPass ? "text" : "password"} name="password" placeholder="Enter your password" value={form.password} onChange={handleChange} />
+                <button type="button" className="auth-toggle-pass" onClick={() => setShowPass(!showPass)}>{showPass ? "Hide" : "Show"}</button>
+              </div>
+            </div>
+            <button className="auth-submit-btn" type="submit" disabled={loading}>
+              {loading ? <span className="auth-spinner" /> : "Sign in"}
+            </button>
+            <div className="auth-divider"><span>or continue with</span></div>
+            <div className="auth-social-btns">
+              <button type="button" className="auth-social-btn">Google</button>
+              <button type="button" className="auth-social-btn">GitHub</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Register Form ──
+function RegisterForm({ onSwitchToLogin, onClose }) {
+  const { login } = useAuth();
+  const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showPass, setShowPass] = useState(false);
+
+  const handleChange = (e) => { setForm({ ...form, [e.target.name]: e.target.value }); setError(""); };
+
+  const getStrength = (p) => {
+    let s = 0;
+    if (p.length >= 8) s++;
+    if (/[A-Z]/.test(p)) s++;
+    if (/[0-9]/.test(p)) s++;
+    if (/[^A-Za-z0-9]/.test(p)) s++;
+    return s;
+  };
+
+  const strength = getStrength(form.password);
+  const strengthLabel = ["", "Weak", "Fair", "Good", "Strong"][strength];
+  const strengthColor = ["", "#E24B4A", "#EF9F27", "#1D9E75", "#0F6E56"][strength];
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!form.name || !form.email || !form.password || !form.confirm) { setError("Please fill in all fields."); return; }
+    if (form.password !== form.confirm) { setError("Passwords do not match."); return; }
+    if (form.password.length < 6) { setError("Password must be at least 6 characters."); return; }
+    setLoading(true);
+    await new Promise(r => setTimeout(r, 1000));
+    login({ name: form.name, email: form.email }, "demo-token-456");
+    setLoading(false);
+    onClose();
+  };
+
+  return (
+    <div className="auth-page">
+      <div className="auth-left auth-left-reg">
+        <div className="auth-art-stack">
+          <div className="auth-art auth-art-1"><img src={artworks[3].image} alt="" /></div>
+          <div className="auth-art auth-art-2"><img src={artworks[6].image} alt="" /></div>
+          <div className="auth-art auth-art-3"><img src={artworks[7].image} alt="" /></div>
+        </div>
+        <div className="auth-left-content">
+          <div className="auth-logo"><span className="auth-logo-star">✦</span><span className="auth-logo-text">ArtyFrenzy</span></div>
+          <p className="auth-left-quote">"Art is not what you see, but what you make others see."</p>
+          <p className="auth-left-author">— Edgar Degas</p>
+        </div>
+      </div>
+      <div className="auth-right">
+        <div className="auth-form-wrap">
+          <p className="auth-eyebrow">✦ Join ArtyFrenzy</p>
+          <h2 className="auth-title">Start your art<br />journey today</h2>
+          <p className="auth-sub">Already have an account? <button className="auth-switch-btn" onClick={onSwitchToLogin}>Sign in</button></p>
+          <form className="auth-form" onSubmit={handleSubmit}>
+            {error && <div className="auth-error">{error}</div>}
+            <div className="auth-field"><label className="auth-label">Full name</label><input className="auth-input" type="text" name="name" placeholder="Priya Sharma" value={form.name} onChange={handleChange} /></div>
+            <div className="auth-field"><label className="auth-label">Email address</label><input className="auth-input" type="email" name="email" placeholder="you@example.com" value={form.email} onChange={handleChange} /></div>
+            <div className="auth-field">
+              <label className="auth-label">Password</label>
+              <div className="auth-input-wrap">
+                <input className="auth-input" type={showPass ? "text" : "password"} name="password" placeholder="Min. 6 characters" value={form.password} onChange={handleChange} />
+                <button type="button" className="auth-toggle-pass" onClick={() => setShowPass(!showPass)}>{showPass ? "Hide" : "Show"}</button>
+              </div>
+              {form.password && (
+                <div className="strength-wrap">
+                  <div className="strength-bar">{[1, 2, 3, 4].map(i => <div key={i} className="strength-seg" style={{ background: i <= strength ? strengthColor : "rgba(44,40,37,0.1)" }} />)}</div>
+                  <span className="strength-label" style={{ color: strengthColor }}>{strengthLabel}</span>
+                </div>
+              )}
+            </div>
+            <div className="auth-field"><label className="auth-label">Confirm password</label><input className="auth-input" type={showPass ? "text" : "password"} name="confirm" placeholder="Re-enter your password" value={form.confirm} onChange={handleChange} /></div>
+            <button className="auth-submit-btn" type="submit" disabled={loading}>{loading ? <span className="auth-spinner" /> : "Create account"}</button>
+            <div className="auth-divider"><span>or sign up with</span></div>
+            <div className="auth-social-btns">
+              <button type="button" className="auth-social-btn">Google</button>
+              <button type="button" className="auth-social-btn">GitHub</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Auth Modal ──
+function AuthModal({ mode, onClose }) {
+  const [authMode, setAuthMode] = useState(mode);
+  return (
+    <div className="auth-modal-overlay" onClick={onClose}>
+      <div className="auth-modal-box" onClick={e => e.stopPropagation()}>
+        <button className="auth-modal-close" onClick={onClose}>✕</button>
+        {authMode === "login"
+          ? <LoginForm onSwitchToRegister={() => setAuthMode("register")} onClose={onClose} />
+          : <RegisterForm onSwitchToLogin={() => setAuthMode("login")} onClose={onClose} />}
+      </div>
+    </div>
+  );
+}
+
+// ── Main App ──
 function AppInner() {
   const { user, logout, isLoggedIn } = useAuth();
+  const { addToRecentlyViewed } = useRecentlyViewed();
   const [activeCategory, setActiveCategory] = useState("All");
   const [cart, setCart] = useState([]);
   const [cartOpen, setCartOpen] = useState(false);
@@ -33,6 +202,8 @@ function AppInner() {
   const [toast, setToast] = useState("");
   const [authModal, setAuthModal] = useState(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [wishlistOpen, setWishlistOpen] = useState(false);
+  const [selectedArtist, setSelectedArtist] = useState(null);
 
   useEffect(() => {
     const onScroll = () => setNavScrolled(window.scrollY > 60);
@@ -41,12 +212,18 @@ function AppInner() {
   }, []);
 
   const filtered = activeCategory === "All" ? artworks : artworks.filter(a => a.category === activeCategory);
+
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(""), 2500); };
 
   const addToCart = (art) => {
     if (!isLoggedIn) { setAuthModal("login"); showToast("Please login to add items to cart!"); return; }
     setCart(prev => prev.find(i => i.id === art.id) ? prev : [...prev, { ...art }]);
     showToast(`"${art.title}" added to cart!`);
+  };
+
+  const handleSelectArt = (art) => {
+    setSelectedArt(art);
+    addToRecentlyViewed(art);
   };
 
   const removeFromCart = (id) => setCart(prev => prev.filter(i => i.id !== id));
@@ -56,18 +233,29 @@ function AppInner() {
   return (
     <div className="app">
       {toast && <div className="toast">{toast}</div>}
+      {authModal && <AuthModal mode={authModal} onClose={() => setAuthModal(null)} />}
+      {selectedArtist && (
+        <ArtistProfile
+          artistName={selectedArtist}
+          onClose={() => setSelectedArtist(null)}
+          onAddToCart={addToCart}
+          cart={cart}
+        />
+      )}
 
-      {/* Auth Modal */}
-      {authModal && (
-        <AuthModal mode={authModal} onClose={() => setAuthModal(null)} />
+      {/* ── Wishlist Modal ── */}
+      {wishlistOpen && (
+        <div className="auth-modal-overlay" onClick={() => setWishlistOpen(false)}>
+          <div className="wishlist-modal-box" onClick={e => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setWishlistOpen(false)}>✕</button>
+            <WishlistPage onAddToCart={addToCart} cart={cart} onClose={() => setWishlistOpen(false)} />
+          </div>
+        </div>
       )}
 
       {/* ── Navbar ── */}
       <nav className={`navbar ${navScrolled ? "scrolled" : ""}`}>
-        <div className="nav-logo">
-          <span className="logo-icon">✦</span>
-          <span className="logo-text">ArtyFrenzy</span>
-        </div>
+        <div className="nav-logo"><span className="logo-icon">✦</span><span className="logo-text">ArtyFrenzy</span></div>
         <div className="nav-links">
           <a href="#gallery">Gallery</a>
           <a href="#about">About</a>
@@ -84,13 +272,10 @@ function AppInner() {
                 <div className="user-dropdown">
                   <div className="user-dropdown-header">
                     <div className="user-avatar-lg">{user.name.charAt(0).toUpperCase()}</div>
-                    <div>
-                      <p className="dropdown-name">{user.name}</p>
-                      <p className="dropdown-email">{user.email}</p>
-                    </div>
+                    <div><p className="dropdown-name">{user.name}</p><p className="dropdown-email">{user.email}</p></div>
                   </div>
                   <div className="user-dropdown-divider" />
-                  <button className="dropdown-item">🎨 My Collection</button>
+                  <button className="dropdown-item" onClick={() => { setWishlistOpen(true); setUserMenuOpen(false); }}>♡ My Wishlist</button>
                   <button className="dropdown-item">📦 My Orders</button>
                   <button className="dropdown-item">⚙️ Settings</button>
                   <div className="user-dropdown-divider" />
@@ -102,8 +287,7 @@ function AppInner() {
             <button className="btn-nav-register" onClick={() => setAuthModal("login")}>Sign in</button>
           )}
           <button className="cart-btn" onClick={() => setCartOpen(true)}>
-            <span>🛍</span>
-            <span>Cart</span>
+            <span>🛍</span><span>Cart</span>
             {cart.length > 0 && <span className="cart-badge">{cart.length}</span>}
           </button>
         </div>
@@ -111,9 +295,7 @@ function AppInner() {
 
       {/* ── Hero ── */}
       <section className="hero">
-        <div className="hero-bg">
-          <div className="blob blob1" /><div className="blob blob2" /><div className="blob blob3" />
-        </div>
+        <div className="hero-bg"><div className="blob blob1" /><div className="blob blob2" /><div className="blob blob3" /></div>
         <div className="hero-content">
           <p className="hero-eyebrow">✦ Curated Fine Art Marketplace</p>
           <h1 className="hero-title">Where Art Finds<br /><span className="hero-accent">Its Collector</span></h1>
@@ -151,15 +333,21 @@ function AppInner() {
         <div className="art-grid">
           {filtered.map((art, i) => (
             <div className="art-card" key={art.id} style={{ animationDelay: `${i * 0.07}s` }}>
-              <div className="art-img-wrap" onClick={() => setSelectedArt(art)}>
+              <div className="art-img-wrap" onClick={() => handleSelectArt(art)}>
                 <img src={art.image} alt={art.title} />
                 <div className="art-overlay"><button className="view-btn">View Details</button></div>
                 {art.tag && <span className="art-tag">{art.tag}</span>}
+                <WishlistButton artwork={art} onLoginRequired={() => setAuthModal("login")} />
               </div>
               <div className="art-info">
                 <span className="art-category">{art.category}</span>
                 <h3 className="art-title">{art.title}</h3>
-                <p className="art-artist">by {art.artist}</p>
+                <p className="art-artist">
+                  by{" "}
+                  <button className="artist-link" onClick={() => setSelectedArtist(art.artist)}>
+                    {art.artist}
+                  </button>
+                </p>
                 <div className="art-footer">
                   <span className="art-price">₹{art.price.toLocaleString()}</span>
                   <button className="add-cart-btn" onClick={() => addToCart(art)}>
@@ -171,6 +359,9 @@ function AppInner() {
           ))}
         </div>
       </section>
+
+      {/* ── Recently Viewed ── */}
+      <RecentlyViewed onSelectArt={handleSelectArt} />
 
       {/* ── About ── */}
       <section className="about-section" id="about">
@@ -210,7 +401,12 @@ function AppInner() {
               <div className="modal-info">
                 <span className="art-category">{selectedArt.category}</span>
                 <h2 className="modal-title">{selectedArt.title}</h2>
-                <p className="modal-artist">by {selectedArt.artist}</p>
+                <p className="modal-artist">
+                  by{" "}
+                  <button className="artist-link" onClick={() => { setSelectedArt(null); setSelectedArtist(selectedArt.artist); }}>
+                    {selectedArt.artist}
+                  </button>
+                </p>
                 <p className="modal-desc">A stunning original artwork that brings life, color and emotion to any space. Hand-crafted with premium materials, certified original with certificate of authenticity.</p>
                 <div className="modal-details">
                   <div className="detail"><span>Medium</span><strong>Oil on Canvas</strong></div>
@@ -222,6 +418,7 @@ function AppInner() {
                 <button className="btn-primary full" onClick={() => { addToCart(selectedArt); setSelectedArt(null); }}>
                   {cart.find(i => i.id === selectedArt.id) ? "✓ Already in Cart" : "Add to Cart"}
                 </button>
+                <ReviewSection artworkId={selectedArt.id} />
               </div>
             </div>
           </div>

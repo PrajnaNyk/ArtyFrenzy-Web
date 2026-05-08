@@ -8,9 +8,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const savedToken = localStorage.getItem("af_token");
     const savedUser = localStorage.getItem("af_user");
-    if (savedToken && savedUser) {
-      setUser(JSON.parse(savedUser));
-    }
+    if (savedToken && savedUser) setUser(JSON.parse(savedUser));
   }, []);
 
   const login = (userData, jwtToken) => {
