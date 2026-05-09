@@ -1,16 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../auth/AuthContext";
+import { reviewAPI } from "../services/api";
 import "./ReviewSection.css";
-
-const initialReviews = {
-  1: [
-    { id: 1, name: "Ananya S.", rating: 5, comment: "Absolutely stunning piece! The colors are even more vibrant in person. Perfect addition to my living room.", date: "April 2026" },
-    { id: 2, name: "Rohan M.", rating: 4, comment: "Beautiful artwork, delivered carefully packed. Very happy with the purchase!", date: "March 2026" },
-  ],
-  2: [
-    { id: 1, name: "Priya K.", rating: 5, comment: "The landscape feels so alive. Meera Nair is truly gifted!", date: "April 2026" },
-  ],
-};
 
 function StarRating({ rating, onRate, interactive = false }) {
   const [hovered, setHovered] = useState(0);
@@ -33,33 +24,54 @@ function StarRating({ rating, onRate, interactive = false }) {
 
 export default function ReviewSection({ artworkId }) {
   const { isLoggedIn, user } = useAuth();
-  const [reviews, setReviews] = useState(initialReviews[artworkId] || []);
+  const [reviews, setReviews] = useState([]);
   const [newReview, setNewReview] = useState({ rating: 0, comment: "" });
-  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    fetchReviews();
+  }, [artworkId]);
+
+  const fetchReviews = async () => {
+    try {
+      const res = await reviewAPI.getByArtwork(artworkId);
+      setReviews(res.data);
+    } catch (err) {
+      console.error("Failed to fetch reviews:", err);
+    }
+  };
 
   const avgRating = reviews.length
     ? (reviews.reduce((s, r) => s + r.rating, 0) / reviews.length).toFixed(1)
     : 0;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (newReview.rating === 0) { setError("Please select a rating."); return; }
     if (!newReview.comment.trim()) { setError("Please write a review."); return; }
+    setLoading(true);
+    try {
+      await reviewAPI.add(user.id, artworkId, newReview.rating, newReview.comment);
+      setNewReview({ rating: 0, comment: "" });
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+      fetchReviews();
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to submit review.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const review = {
-      id: Date.now(),
-      name: user?.name || "Anonymous",
-      rating: newReview.rating,
-      comment: newReview.comment,
-      date: new Date().toLocaleDateString("en-IN", { month: "long", year: "numeric" }),
-    };
-
-    setReviews(prev => [review, ...prev]);
-    setNewReview({ rating: 0, comment: "" });
-    setSubmitted(true);
-    setError("");
-    setTimeout(() => setSubmitted(false), 3000);
+  const handleDelete = async (reviewId) => {
+    try {
+      await reviewAPI.delete(reviewId, user.id);
+      fetchReviews();
+    } catch (err) {
+      console.error("Failed to delete review:", err);
+    }
   };
 
   return (
@@ -75,7 +87,6 @@ export default function ReviewSection({ artworkId }) {
         )}
       </div>
 
-      {/* Write a review */}
       {isLoggedIn ? (
         <form className="review-form" onSubmit={handleSubmit}>
           <p className="review-form-label">Write a review</p>
@@ -92,8 +103,10 @@ export default function ReviewSection({ artworkId }) {
             rows={3}
           />
           {error && <p className="review-error">{error}</p>}
-          {submitted && <p className="review-success">✓ Review submitted!</p>}
-          <button className="review-submit-btn" type="submit">Submit Review</button>
+          {success && <p className="review-success">✓ Review submitted!</p>}
+          <button className="review-submit-btn" type="submit" disabled={loading}>
+            {loading ? "Submitting..." : "Submit Review"}
+          </button>
         </form>
       ) : (
         <div className="review-login-prompt">
@@ -101,7 +114,6 @@ export default function ReviewSection({ artworkId }) {
         </div>
       )}
 
-      {/* Reviews list */}
       <div className="reviews-list">
         {reviews.length === 0 ? (
           <p className="no-reviews">No reviews yet. Be the first to review!</p>
@@ -109,12 +121,17 @@ export default function ReviewSection({ artworkId }) {
           reviews.map(review => (
             <div className="review-item" key={review.id}>
               <div className="review-item-header">
-                <div className="review-item-avatar">{review.name.charAt(0)}</div>
+                <div className="review-item-avatar">{review.user?.name?.charAt(0) || "U"}</div>
                 <div>
-                  <p className="review-item-name">{review.name}</p>
+                  <p className="review-item-name">{review.user?.name || "Anonymous"}</p>
                   <StarRating rating={review.rating} />
                 </div>
-                <span className="review-item-date">{review.date}</span>
+                <span className="review-item-date">
+                  {new Date(review.createdAt).toLocaleDateString("en-IN", { month: "long", year: "numeric" })}
+                </span>
+                {user?.id === review.user?.id && (
+                  <button className="review-delete-btn" onClick={() => handleDelete(review.id)}>✕</button>
+                )}
               </div>
               <p className="review-item-comment">{review.comment}</p>
             </div>

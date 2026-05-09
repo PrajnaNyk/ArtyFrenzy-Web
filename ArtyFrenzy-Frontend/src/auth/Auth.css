@@ -3,7 +3,7 @@
 .auth-page {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  min-height: 100vh;
+  min-height: 560px;
   font-family: 'DM Sans', sans-serif;
 }
 
@@ -16,7 +16,7 @@
   flex-direction: column;
   justify-content: flex-end;
   padding: 48px;
-  min-height: 100vh;
+  min-height: 560px;
 }
 .auth-left-reg { background: #2C2825; }
 

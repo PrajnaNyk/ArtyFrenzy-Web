@@ -7,19 +7,8 @@ import RecentlyViewed from "./components/RecentlyViewed";
 import ReviewSection from "./components/ReviewSection";
 import WishlistPage from "./pages/WishlistPage";
 import ArtistProfile from "./pages/ArtistProfile";
+import { artworkAPI } from "./services/api";
 import "./App.css";
-
-// ── Artworks Data ──
-const artworks = [
-  { id: 1, title: "Crimson Reverie", artist: "Meera Nair", price: 12500, category: "Abstract", image: "https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=600&q=80", tag: "Featured" },
-  { id: 2, title: "Golden Horizons", artist: "Arjun Pillai", price: 8900, category: "Landscape", image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=600&q=80", tag: "New" },
-  { id: 3, title: "Silent Waters", artist: "Priya Sharma", price: 15000, category: "Impressionism", image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80", tag: "" },
-  { id: 4, title: "Urban Pulse", artist: "Rahul Desai", price: 6500, category: "Modern", image: "https://images.unsplash.com/photo-1549887534-1541e9326642?w=600&q=80", tag: "Trending" },
-  { id: 5, title: "Eternal Bloom", artist: "Kavya Reddy", price: 19000, category: "Floral", image: "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=600&q=80", tag: "Featured" },
-  { id: 6, title: "Midnight Echo", artist: "Siddharth R.", price: 11200, category: "Abstract", image: "https://images.unsplash.com/photo-1547826039-bfc35e0f1ea8?w=600&q=80", tag: "" },
-  { id: 7, title: "Desert Song", artist: "Ananya Iyer", price: 7800, category: "Landscape", image: "https://images.unsplash.com/photo-1605721911519-3dfeb3be25e7?w=600&q=80", tag: "New" },
-  { id: 8, title: "The Wanderer", artist: "Vikram Nath", price: 22000, category: "Portrait", image: "https://images.unsplash.com/photo-1576020799627-aeac74d58064?w=600&q=80", tag: "" },
-];
 
 const categories = ["All", "Abstract", "Landscape", "Impressionism", "Modern", "Floral", "Portrait"];
 
@@ -37,19 +26,23 @@ function LoginForm({ onSwitchToRegister, onClose }) {
     e.preventDefault();
     if (!form.email || !form.password) { setError("Please fill in all fields."); return; }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1000));
-    login({ name: "Art Lover", email: form.email }, "demo-token-123");
-    setLoading(false);
-    onClose();
+    try {
+      await login(form.email, form.password);
+      onClose();
+    } catch (err) {
+      setError(err.response?.data?.message || "Invalid email or password.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="auth-page">
       <div className="auth-left">
         <div className="auth-art-stack">
-          <div className="auth-art auth-art-1"><img src={artworks[0].image} alt="" /></div>
-          <div className="auth-art auth-art-2"><img src={artworks[4].image} alt="" /></div>
-          <div className="auth-art auth-art-3"><img src={artworks[2].image} alt="" /></div>
+          <div className="auth-art auth-art-1"><img src="https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400&q=80" alt="" /></div>
+          <div className="auth-art auth-art-2"><img src="https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=400&q=80" alt="" /></div>
+          <div className="auth-art auth-art-3"><img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80" alt="" /></div>
         </div>
         <div className="auth-left-content">
           <div className="auth-logo"><span className="auth-logo-star">✦</span><span className="auth-logo-text">ArtyFrenzy</span></div>
@@ -92,7 +85,7 @@ function LoginForm({ onSwitchToRegister, onClose }) {
 
 // ── Register Form ──
 function RegisterForm({ onSwitchToLogin, onClose }) {
-  const { login } = useAuth();
+  const { register } = useAuth();
   const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -119,19 +112,23 @@ function RegisterForm({ onSwitchToLogin, onClose }) {
     if (form.password !== form.confirm) { setError("Passwords do not match."); return; }
     if (form.password.length < 6) { setError("Password must be at least 6 characters."); return; }
     setLoading(true);
-    await new Promise(r => setTimeout(r, 1000));
-    login({ name: form.name, email: form.email }, "demo-token-456");
-    setLoading(false);
-    onClose();
+    try {
+      await register(form.name, form.email, form.password);
+      onClose();
+    } catch (err) {
+      setError(err.response?.data?.message || "Registration failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="auth-page">
       <div className="auth-left auth-left-reg">
         <div className="auth-art-stack">
-          <div className="auth-art auth-art-1"><img src={artworks[3].image} alt="" /></div>
-          <div className="auth-art auth-art-2"><img src={artworks[6].image} alt="" /></div>
-          <div className="auth-art auth-art-3"><img src={artworks[7].image} alt="" /></div>
+          <div className="auth-art auth-art-1"><img src="https://images.unsplash.com/photo-1549887534-1541e9326642?w=400&q=80" alt="" /></div>
+          <div className="auth-art auth-art-2"><img src="https://images.unsplash.com/photo-1605721911519-3dfeb3be25e7?w=400&q=80" alt="" /></div>
+          <div className="auth-art auth-art-3"><img src="https://images.unsplash.com/photo-1576020799627-aeac74d58064?w=400&q=80" alt="" /></div>
         </div>
         <div className="auth-left-content">
           <div className="auth-logo"><span className="auth-logo-star">✦</span><span className="auth-logo-text">ArtyFrenzy</span></div>
@@ -194,6 +191,8 @@ function AuthModal({ mode, onClose }) {
 function AppInner() {
   const { user, logout, isLoggedIn } = useAuth();
   const { addToRecentlyViewed } = useRecentlyViewed();
+  const [artworks, setArtworks] = useState([]);
+  const [artworksLoading, setArtworksLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("All");
   const [cart, setCart] = useState([]);
   const [cartOpen, setCartOpen] = useState(false);
@@ -205,13 +204,30 @@ function AppInner() {
   const [wishlistOpen, setWishlistOpen] = useState(false);
   const [selectedArtist, setSelectedArtist] = useState(null);
 
+  // Fetch artworks from backend
+  useEffect(() => {
+    const fetchArtworks = async () => {
+      try {
+        const res = await artworkAPI.getAll();
+        setArtworks(res.data);
+      } catch (err) {
+        console.error("Failed to fetch artworks:", err);
+      } finally {
+        setArtworksLoading(false);
+      }
+    };
+    fetchArtworks();
+  }, []);
+
   useEffect(() => {
     const onScroll = () => setNavScrolled(window.scrollY > 60);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const filtered = activeCategory === "All" ? artworks : artworks.filter(a => a.category === activeCategory);
+  const filtered = activeCategory === "All"
+    ? artworks
+    : artworks.filter(a => a.category === activeCategory);
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(""), 2500); };
 
@@ -235,12 +251,7 @@ function AppInner() {
       {toast && <div className="toast">{toast}</div>}
       {authModal && <AuthModal mode={authModal} onClose={() => setAuthModal(null)} />}
       {selectedArtist && (
-        <ArtistProfile
-          artistName={selectedArtist}
-          onClose={() => setSelectedArtist(null)}
-          onAddToCart={addToCart}
-          cart={cart}
-        />
+        <ArtistProfile artistName={selectedArtist} onClose={() => setSelectedArtist(null)} onAddToCart={addToCart} cart={cart} />
       )}
 
       {/* ── Wishlist Modal ── */}
@@ -313,9 +324,9 @@ function AppInner() {
           </div>
         </div>
         <div className="hero-image-grid">
-          <div className="hero-img hero-img-1"><img src={artworks[0].image} alt="" /></div>
-          <div className="hero-img hero-img-2"><img src={artworks[4].image} alt="" /></div>
-          <div className="hero-img hero-img-3"><img src={artworks[2].image} alt="" /></div>
+          <div className="hero-img hero-img-1"><img src="https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=600&q=80" alt="" /></div>
+          <div className="hero-img hero-img-2"><img src="https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=600&q=80" alt="" /></div>
+          <div className="hero-img hero-img-3"><img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80" alt="" /></div>
         </div>
       </section>
 
@@ -330,34 +341,41 @@ function AppInner() {
             <button key={cat} className={`filter-btn ${activeCategory === cat ? "active" : ""}`} onClick={() => setActiveCategory(cat)}>{cat}</button>
           ))}
         </div>
-        <div className="art-grid">
-          {filtered.map((art, i) => (
-            <div className="art-card" key={art.id} style={{ animationDelay: `${i * 0.07}s` }}>
-              <div className="art-img-wrap" onClick={() => handleSelectArt(art)}>
-                <img src={art.image} alt={art.title} />
-                <div className="art-overlay"><button className="view-btn">View Details</button></div>
-                {art.tag && <span className="art-tag">{art.tag}</span>}
-                <WishlistButton artwork={art} onLoginRequired={() => setAuthModal("login")} />
-              </div>
-              <div className="art-info">
-                <span className="art-category">{art.category}</span>
-                <h3 className="art-title">{art.title}</h3>
-                <p className="art-artist">
-                  by{" "}
-                  <button className="artist-link" onClick={() => setSelectedArtist(art.artist)}>
-                    {art.artist}
-                  </button>
-                </p>
-                <div className="art-footer">
-                  <span className="art-price">₹{art.price.toLocaleString()}</span>
-                  <button className="add-cart-btn" onClick={() => addToCart(art)}>
-                    {cart.find(i => i.id === art.id) ? "✓ Added" : "+ Cart"}
-                  </button>
+
+        {artworksLoading ? (
+          <div className="artworks-loading">
+            <p>Loading artworks...</p>
+          </div>
+        ) : (
+          <div className="art-grid">
+            {filtered.map((art, i) => (
+              <div className="art-card" key={art.id} style={{ animationDelay: `${i * 0.07}s` }}>
+                <div className="art-img-wrap" onClick={() => handleSelectArt(art)}>
+                  <img src={art.imageUrl} alt={art.title} />
+                  <div className="art-overlay"><button className="view-btn">View Details</button></div>
+                  {art.tag && <span className="art-tag">{art.tag}</span>}
+                  <WishlistButton artwork={art} onLoginRequired={() => setAuthModal("login")} />
+                </div>
+                <div className="art-info">
+                  <span className="art-category">{art.category}</span>
+                  <h3 className="art-title">{art.title}</h3>
+                  <p className="art-artist">
+                    by{" "}
+                    <button className="artist-link" onClick={() => setSelectedArtist(art.artist)}>
+                      {art.artist}
+                    </button>
+                  </p>
+                  <div className="art-footer">
+                    <span className="art-price">₹{art.price.toLocaleString()}</span>
+                    <button className="add-cart-btn" onClick={() => addToCart(art)}>
+                      {cart.find(i => i.id === art.id) ? "✓ Added" : "+ Cart"}
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* ── Recently Viewed ── */}
@@ -397,7 +415,7 @@ function AppInner() {
           <div className="modal" onClick={e => e.stopPropagation()}>
             <button className="modal-close" onClick={() => setSelectedArt(null)}>✕</button>
             <div className="modal-content">
-              <div className="modal-img"><img src={selectedArt.image} alt={selectedArt.title} /></div>
+              <div className="modal-img"><img src={selectedArt.imageUrl} alt={selectedArt.title} /></div>
               <div className="modal-info">
                 <span className="art-category">{selectedArt.category}</span>
                 <h2 className="modal-title">{selectedArt.title}</h2>
@@ -407,7 +425,7 @@ function AppInner() {
                     {selectedArt.artist}
                   </button>
                 </p>
-                <p className="modal-desc">A stunning original artwork that brings life, color and emotion to any space. Hand-crafted with premium materials, certified original with certificate of authenticity.</p>
+                <p className="modal-desc">{selectedArt.description}</p>
                 <div className="modal-details">
                   <div className="detail"><span>Medium</span><strong>Oil on Canvas</strong></div>
                   <div className="detail"><span>Size</span><strong>24" × 36"</strong></div>
@@ -440,7 +458,7 @@ function AppInner() {
                 <div className="cart-items">
                   {cart.map(item => (
                     <div className="cart-item" key={item.id}>
-                      <img src={item.image} alt={item.title} />
+                      <img src={item.imageUrl} alt={item.title} />
                       <div className="cart-item-info">
                         <p className="cart-item-title">{item.title}</p>
                         <p className="cart-item-artist">by {item.artist}</p>
