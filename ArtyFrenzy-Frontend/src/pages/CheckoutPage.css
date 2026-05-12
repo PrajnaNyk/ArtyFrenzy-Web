@@ -1,0 +1,122 @@
+.checkout-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(28,25,23,0.8);
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(6px);
+  animation: fadeIn 0.2s ease;
+}
+
+.checkout-box {
+  background: #F9F5EF;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  padding: 36px;
+  animation: scaleIn 0.25s ease;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.3);
+}
+
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+@keyframes scaleIn { from{opacity:0;transform:scale(0.95)} to{opacity:1;transform:scale(1)} }
+
+.checkout-close {
+  position: absolute;
+  top: 16px; right: 16px;
+  background: rgba(44,40,37,0.08);
+  border: none;
+  border-radius: 50%;
+  width: 32px; height: 32px;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1C1917;
+  transition: background 0.2s;
+}
+.checkout-close:hover { background: #1C1917; color: #F9F5EF; }
+
+.checkout-header { margin-bottom: 24px; }
+.checkout-eyebrow { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: #C9963A; font-weight: 500; margin-bottom: 6px; }
+.checkout-title { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 300; color: #1C1917; }
+
+/* Items */
+.checkout-items { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+.checkout-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #FFFDF9;
+  border-radius: 12px;
+  border: 1px solid rgba(44,40,37,0.08);
+}
+.checkout-item-img { width: 56px; height: 56px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+.checkout-item-info { flex: 1; }
+.checkout-item-title { font-size: 14px; font-weight: 500; color: #1C1917; margin-bottom: 2px; }
+.checkout-item-artist { font-size: 12px; color: #7C7168; }
+.checkout-item-price { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 600; color: #1C1917; white-space: nowrap; }
+
+/* Summary */
+.checkout-summary { background: #FFFDF9; border-radius: 12px; padding: 16px; margin-bottom: 20px; border: 1px solid rgba(44,40,37,0.08); }
+.checkout-summary-row { display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: #7C7168; margin-bottom: 10px; }
+.checkout-summary-row:last-child { margin-bottom: 0; }
+.checkout-free { color: #1D9E75; font-weight: 500; }
+.checkout-divider { height: 1px; background: rgba(44,40,37,0.1); margin: 12px 0; }
+.checkout-total-row { color: #1C1917; font-size: 16px; }
+.checkout-total-row strong { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: #1C1917; }
+
+/* Buyer */
+.checkout-buyer { margin-bottom: 20px; padding: 14px 16px; background: rgba(201,150,58,0.08); border-radius: 10px; border: 1px solid rgba(201,150,58,0.2); }
+.checkout-buyer-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #C9963A; font-weight: 500; margin-bottom: 4px; }
+.checkout-buyer-name { font-size: 14px; font-weight: 500; color: #1C1917; }
+.checkout-buyer-email { font-size: 13px; color: #7C7168; }
+
+/* Error */
+.checkout-error { background: #FCEBEB; border: 1px solid #F09595; color: #A32D2D; padding: 10px 14px; border-radius: 10px; font-size: 13px; margin-bottom: 16px; }
+
+/* Pay button */
+.checkout-pay-btn {
+  width: 100%;
+  padding: 15px;
+  background: #1C1917;
+  color: #F9F5EF;
+  border: none;
+  border-radius: 50px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.25s ease;
+  margin-bottom: 12px;
+  min-height: 52px;
+}
+.checkout-pay-btn:hover:not(:disabled) {
+  background: #C9963A;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(201,150,58,0.3);
+}
+.checkout-pay-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+
+.checkout-spinner {
+  width: 20px; height: 20px;
+  border: 2px solid rgba(249,245,239,0.3);
+  border-top-color: #F9F5EF;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.checkout-secure-note { text-align: center; font-size: 12px; color: #7C7168; }

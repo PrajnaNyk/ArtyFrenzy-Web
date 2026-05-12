@@ -2,7 +2,7 @@ package com.art.artyfrenzy.config;
 
 import com.art.artyfrenzy.repository.UserRepository;
 import com.art.artyfrenzy.security.JwtAuthFilter;
-import lombok.RequiredArgsConstructor;
+//import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -52,6 +52,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/reviews/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/reviews/**").authenticated()
                         .requestMatchers("/api/wishlist/**").authenticated()
+                        .requestMatchers("/api/payments/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/artworks/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/artworks/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/artworks/**").hasRole("ADMIN")

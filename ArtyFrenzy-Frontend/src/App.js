@@ -8,7 +8,9 @@ import ReviewSection from "./components/ReviewSection";
 import WishlistPage from "./pages/WishlistPage";
 import ArtistProfile from "./pages/ArtistProfile";
 import { artworkAPI } from "./services/api";
+import CheckoutPage from "./pages/CheckoutPage";
 import "./App.css";
+import "./auth/Auth.css";
 
 const categories = ["All", "Abstract", "Landscape", "Impressionism", "Modern", "Floral", "Portrait"];
 
@@ -74,7 +76,6 @@ function LoginForm({ onSwitchToRegister, onClose }) {
             <div className="auth-divider"><span>or continue with</span></div>
             <div className="auth-social-btns">
               <button type="button" className="auth-social-btn">Google</button>
-              <button type="button" className="auth-social-btn">GitHub</button>
             </div>
           </form>
         </div>
@@ -160,11 +161,10 @@ function RegisterForm({ onSwitchToLogin, onClose }) {
             </div>
             <div className="auth-field"><label className="auth-label">Confirm password</label><input className="auth-input" type={showPass ? "text" : "password"} name="confirm" placeholder="Re-enter your password" value={form.confirm} onChange={handleChange} /></div>
             <button className="auth-submit-btn" type="submit" disabled={loading}>{loading ? <span className="auth-spinner" /> : "Create account"}</button>
-            <div className="auth-divider"><span>or sign up with</span></div>
+            {/* <div className="auth-divider"><span>or sign up with</span></div>
             <div className="auth-social-btns">
               <button type="button" className="auth-social-btn">Google</button>
-              <button type="button" className="auth-social-btn">GitHub</button>
-            </div>
+            </div> */}
           </form>
         </div>
       </div>
@@ -196,6 +196,7 @@ function AppInner() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [cart, setCart] = useState([]);
   const [cartOpen, setCartOpen] = useState(false);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [selectedArt, setSelectedArt] = useState(null);
   const [navScrolled, setNavScrolled] = useState(false);
   const [toast, setToast] = useState("");
@@ -262,6 +263,20 @@ function AppInner() {
             <WishlistPage onAddToCart={addToCart} cart={cart} onClose={() => setWishlistOpen(false)} />
           </div>
         </div>
+      )}
+
+      {/* ── Payment ── */}
+      {checkoutOpen && (
+        <CheckoutPage
+          cart={cart}
+          onClose={() => setCheckoutOpen(false)}
+          onPaymentSuccess={() => {
+            setCart([]);
+            setCheckoutOpen(false);
+            setCartOpen(false);
+            showToast("🎨 Payment successful! Thank you for your purchase!");
+          }}
+        />
       )}
 
       {/* ── Navbar ── */}
@@ -470,7 +485,7 @@ function AppInner() {
                 </div>
                 <div className="cart-footer">
                   <div className="cart-total"><span>Total</span><strong>₹{total.toLocaleString()}</strong></div>
-                  <button className="btn-primary full">Proceed to Checkout</button>
+                  <button className="btn-primary full" onClick={() => setCheckoutOpen(true)}>Proceed to Checkout</button>
                 </div>
               </>
             )}

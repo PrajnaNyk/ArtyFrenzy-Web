@@ -2,20 +2,17 @@ import axios from "axios";
 
 const BASE_URL = "http://localhost:8080/api";
 
-// ── Axios instance with JWT token auto-attached ──
 const api = axios.create({
   baseURL: BASE_URL,
   headers: { "Content-Type": "application/json" },
 });
 
-// Attach JWT token to every request automatically
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("af_token");
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-// Handle 401 (token expired) globally
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -28,30 +25,27 @@ api.interceptors.response.use(
   }
 );
 
-// ── Auth APIs ──
+// ── Auth ──
 export const authAPI = {
-  login: (email, password) =>
-    api.post("/auth/login", { email, password }),
-
-  register: (name, email, password) =>
-    api.post("/auth/register", { name, email, password }),
+  login: (email, password) => api.post("/auth/login", { email, password }),
+  register: (name, email, password) => api.post("/auth/register", { name, email, password }),
 };
 
-// ── Artwork APIs ──
+// ── Artworks ──
 export const artworkAPI = {
   getAll: () => api.get("/artworks"),
   getById: (id) => api.get(`/artworks/${id}`),
   getByCategory: (category) => api.get(`/artworks/category/${category}`),
 };
 
-// ── Artist APIs ──
+// ── Artists ──
 export const artistAPI = {
   getAll: () => api.get("/artists"),
-  getByName: (name) => api.get(`/artists/name/${name}`),
+  getByName: (name) => api.get(`/artists/name/${encodeURIComponent(name)}`),
   getById: (id) => api.get(`/artists/${id}`),
 };
 
-// ── Wishlist APIs ──
+// ── Wishlist ──
 export const wishlistAPI = {
   getWishlist: (userId) => api.get(`/wishlist/${userId}`),
   add: (userId, artworkId) => api.post("/wishlist", { userId, artworkId }),
@@ -59,13 +53,18 @@ export const wishlistAPI = {
   check: (userId, artworkId) => api.get(`/wishlist/check?userId=${userId}&artworkId=${artworkId}`),
 };
 
-// ── Review APIs ──
+// ── Reviews ──
 export const reviewAPI = {
   getByArtwork: (artworkId) => api.get(`/reviews/artwork/${artworkId}`),
-  add: (userId, artworkId, rating, comment) =>
-    api.post("/reviews", { userId, artworkId, rating, comment }),
-  delete: (reviewId, userId) =>
-    api.delete(`/reviews/${reviewId}?userId=${userId}`),
+  add: (userId, artworkId, rating, comment) => api.post("/reviews", { userId, artworkId, rating, comment }),
+  delete: (reviewId, userId) => api.delete(`/reviews/${reviewId}?userId=${userId}`),
+};
+
+// ── Payments ──
+export const paymentAPI = {
+  createOrder: (data) => api.post("/payments/create-order", data),
+  verifyPayment: (data) => api.post("/payments/verify", data),
+  getUserOrders: (userId) => api.get(`/payments/orders/${userId}`),
 };
 
 export default api;
