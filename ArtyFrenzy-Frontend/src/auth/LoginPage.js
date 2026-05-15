@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useAuth } from "./AuthContext";
+import { useNavigate } from "react-router-dom"; // <-- Import useNavigate
 import "./Auth.css";
 
 export default function LoginPage({ onSwitchToRegister, onClose }) {
   const { login } = useAuth();
+  const navigate = useNavigate(); // <-- Initialize navigate
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -22,26 +24,23 @@ export default function LoginPage({ onSwitchToRegister, onClose }) {
     }
     setLoading(true);
     try {
-      // Replace with real API call when backend is ready:
-      // const res = await fetch("http://localhost:8080/api/auth/login", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify(form),
-      // });
-      // const data = await res.json();
-      // if (!res.ok) throw new Error(data.message || "Login failed");
-      // login({ name: data.name, email: data.email }, data.token);
-
-      await new Promise(r => setTimeout(r, 1000));
-      login({ name: "Art Lover", email: form.email }, "demo-token-123");
-      onClose();
+      // Call the real login function from AuthContext
+      const userData = await login(form.email, form.password);
+      
+      // Check the role and redirect accordingly
+      if (userData.role === "ADMIN") {
+        navigate("/admin"); // Go to admin dashboard
+      } else {
+        onClose(); // Close modal and stay on user site
+      }
     } catch (err) {
-      setError(err.message || "Login failed. Please try again.");
+      setError(err.response?.data?.message || "Invalid email or password.");
     } finally {
       setLoading(false);
     }
   };
 
+  // ... (Keep the rest of the return statement exactly the same as your original file)
   return (
     <div className="auth-page">
       <div className="auth-left">

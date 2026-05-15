@@ -2,6 +2,10 @@ import { useState } from "react";
 import { useAuth } from "../auth/AuthContext";
 import AdminLayout from "./AdminLayout";
 import AdminDashboard from "./AdminDashboard";
+import AdminArtworks from "./AdminArtworks";
+import AdminArtists from "./AdminArtists";   
+import AdminOrders from "./AdminOrders";     
+import AdminUsers from "./AdminUsers";       
 
 // Placeholder pages - will be replaced with real ones
 function ComingSoon({ page }) {
@@ -43,10 +47,10 @@ export default function AdminApp() {
   const renderPage = () => {
     switch (activePage) {
       case "dashboard": return <AdminDashboard />;
-      case "artworks":  return <ComingSoon page="Artworks" />;
-      case "artists":   return <ComingSoon page="Artists" />;
-      case "orders":    return <ComingSoon page="Orders" />;
-      case "users":     return <ComingSoon page="Users" />;
+      case "artworks":  return <AdminArtworks />;      // <-- Replaced ComingSoon
+      case "artists":   return <AdminArtists />;        // <-- Added new component
+      case "orders":    return <AdminOrders />;         // <-- Added new component
+      case "users":     return <AdminUsers />;          // <-- Added new component
       default:          return <AdminDashboard />;
     }
   };

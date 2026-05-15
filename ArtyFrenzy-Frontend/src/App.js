@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom"; // <-- Added Router imports
 import { AuthProvider, useAuth } from "./auth/AuthContext";
 import { WishlistProvider } from "./context/WishlistContext";
 import { RecentlyViewedProvider, useRecentlyViewed } from "./context/RecentlyViewedContext";
@@ -9,14 +10,25 @@ import WishlistPage from "./pages/WishlistPage";
 import ArtistProfile from "./pages/ArtistProfile";
 import { artworkAPI } from "./services/api";
 import CheckoutPage from "./pages/CheckoutPage";
+import AdminApp from "./admin/AdminApp"; // <-- Import AdminApp
 import "./App.css";
 import "./auth/Auth.css";
 
 const categories = ["All", "Abstract", "Landscape", "Impressionism", "Modern", "Floral", "Portrait"];
 
+// ── Admin Route Protector ──
+function AdminRoute() {
+  const { user, isLoggedIn } = useAuth();
+  if (!isLoggedIn || user?.role !== "ADMIN") {
+    return <Navigate to="/" replace />;
+  }
+  return <AdminApp />;
+}
+
 // ── Login Form ──
 function LoginForm({ onSwitchToRegister, onClose }) {
   const { login } = useAuth();
+  const navigate = useNavigate(); // <-- Hook for redirection
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -29,8 +41,14 @@ function LoginForm({ onSwitchToRegister, onClose }) {
     if (!form.email || !form.password) { setError("Please fill in all fields."); return; }
     setLoading(true);
     try {
-      await login(form.email, form.password);
-      onClose();
+      const userData = await login(form.email, form.password); // <-- Get user data back
+      
+      // ── ROLE BASED REDIRECTION ──
+      if (userData.role === "ADMIN") {
+        navigate("/admin"); // Redirect to admin dashboard
+      } else {
+        onClose(); // Close modal for regular users
+      }
     } catch (err) {
       setError(err.response?.data?.message || "Invalid email or password.");
     } finally {
@@ -183,9 +201,10 @@ function AuthModal({ mode, onClose }) {
   );
 }
 
-// ── Main App ──
+// ── Main App (User Site) ──
 function AppInner() {
   const { user, logout, isLoggedIn } = useAuth();
+  const navigate = useNavigate(); // <-- Added for admin redirect link
   const { addToRecentlyViewed } = useRecentlyViewed();
   const [artworks, setArtworks] = useState([]);
   const [artworksLoading, setArtworksLoading] = useState(true);
@@ -326,6 +345,14 @@ function AppInner() {
                     <div><p className="dropdown-name">{user.name}</p><p className="dropdown-email">{user.email}</p></div>
                   </div>
                   <div className="user-dropdown-divider" />
+                  
+                  {/* ── ADMIN DASHBOARD LINK ── */}
+                  {user?.role === "ADMIN" && (
+                    <button className="dropdown-item" onClick={() => { setUserMenuOpen(false); navigate("/admin"); }}>
+                      🛠️ Admin Dashboard
+                    </button>
+                  )}
+
                   <button className="dropdown-item" onClick={() => { setWishlistOpen(true); setUserMenuOpen(false); }}>♡ My Wishlist</button>
                   <button className="dropdown-item">📦 My Orders</button>
                   <button className="dropdown-item">⚙️ Settings</button>
@@ -521,14 +548,23 @@ function AppInner() {
   );
 }
 
+// ── Root Component with Router ──
 export default function App() {
   return (
-    <AuthProvider>
-      <WishlistProvider>
-        <RecentlyViewedProvider>
-          <AppInner />
-        </RecentlyViewedProvider>
-      </WishlistProvider>
-    </AuthProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <WishlistProvider>
+          <RecentlyViewedProvider>
+            <Routes>
+              {/* User Routes */}
+              <Route path="/*" element={<AppInner />} />
+              
+              {/* Protected Admin Route */}
+              <Route path="/admin/*" element={<AdminRoute />} />
+            </Routes>
+          </RecentlyViewedProvider>
+        </WishlistProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
