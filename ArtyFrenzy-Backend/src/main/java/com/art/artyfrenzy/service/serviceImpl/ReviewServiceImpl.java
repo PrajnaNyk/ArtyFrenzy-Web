@@ -10,6 +10,7 @@ import com.art.artyfrenzy.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime; 
 import java.util.List;
 
 @Service
@@ -44,6 +45,7 @@ public class ReviewServiceImpl implements ReviewService {
                         .artwork(artwork)
                         .rating(rating)
                         .comment(comment)
+                        .createdAt(LocalDateTime.now()) // <-- EXPLICITLY SET IT HERE
                         .build()
         );
     }

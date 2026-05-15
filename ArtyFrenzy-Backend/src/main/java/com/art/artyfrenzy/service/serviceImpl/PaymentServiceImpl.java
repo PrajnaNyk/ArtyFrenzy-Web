@@ -36,49 +36,62 @@ public class PaymentServiceImpl implements PaymentService {
     private String razorpayKeySecret;
 
     @Override
-    public Map<String, Object> createOrder(PaymentRequest request) throws Exception {
-        // Create Razorpay order
-        RazorpayClient razorpay = new RazorpayClient(razorpayKeyId, razorpayKeySecret);
+    public Map<String, Object> createOrder(PaymentRequest request) {
+        try {
+            // Safety checks
+            if (request.getUserId() == null || request.getArtworkIds() == null || request.getTotalAmount() == null) {
+                throw new RuntimeException("Missing required payment fields.");
+            }
 
-        JSONObject orderRequest = new JSONObject();
-        // Amount in paise (multiply by 100)
-        orderRequest.put("amount", (int)(request.getTotalAmount() * 100));
-        orderRequest.put("currency", "INR");
-        orderRequest.put("receipt", "order_" + System.currentTimeMillis());
+            // Create Razorpay order
+            RazorpayClient razorpay = new RazorpayClient(razorpayKeyId, razorpayKeySecret);
 
-        com.razorpay.Order razorpayOrder = razorpay.orders.create(orderRequest);
+            JSONObject orderRequest = new JSONObject();
+            // Amount in paise (multiply by 100) - use Math.round to avoid decimal issues
+            orderRequest.put("amount", Math.round(request.getTotalAmount() * 100));
+            orderRequest.put("currency", "INR");
+            orderRequest.put("receipt", "order_" + System.currentTimeMillis());
 
-        // Save order in DB
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+            com.razorpay.Order razorpayOrder = razorpay.orders.create(orderRequest);
 
-        Order order = Order.builder()
-                .user(user)
-                .totalAmount(request.getTotalAmount())
-                .razorpayOrderId(razorpayOrder.get("id"))
-                .status(Order.OrderStatus.PENDING)
-                .build();
+            // Save order in DB
+            User user = userRepository.findById(request.getUserId())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
 
-        List<OrderItem> items = new ArrayList<>();
-        for (Long artworkId : request.getArtworkIds()) {
-            Artwork artwork = artworkRepository.findById(artworkId)
-                    .orElseThrow(() -> new RuntimeException("Artwork not found: " + artworkId));
-            items.add(OrderItem.builder()
-                    .order(order)
-                    .artwork(artwork)
-                    .price(artwork.getPrice())
-                    .build());
+            Order order = Order.builder()
+                    .user(user)
+                    .totalAmount(request.getTotalAmount())
+                    .razorpayOrderId(razorpayOrder.get("id"))
+                    .status(Order.OrderStatus.PENDING)
+                    .build();
+
+            List<OrderItem> items = new ArrayList<>();
+            for (Long artworkId : request.getArtworkIds()) {
+                Artwork artwork = artworkRepository.findById(artworkId)
+                        .orElseThrow(() -> new RuntimeException("Artwork not found: " + artworkId));
+                items.add(OrderItem.builder()
+                        .order(order)
+                        .artwork(artwork)
+                        .price(artwork.getPrice())
+                        .build());
+            }
+            order.setItems(items);
+            orderRepository.save(order);
+
+            // Return details needed by frontend
+            Map<String, Object> response = new HashMap<>();
+            response.put("razorpayOrderId", razorpayOrder.get("id"));
+            response.put("amount", request.getTotalAmount());
+            response.put("currency", "INR");
+            response.put("keyId", razorpayKeyId);
+            return response;
+
+        } catch (RazorpayException e) {
+            // This will now show the EXACT Razorpay error to the frontend!
+            throw new RuntimeException("Razorpay Error: " + e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException("Order creation failed: " + e.getMessage());
         }
-        order.setItems(items);
-        orderRepository.save(order);
-
-        // Return details needed by frontend
-        Map<String, Object> response = new HashMap<>();
-        response.put("razorpayOrderId", razorpayOrder.get("id"));
-        response.put("amount", request.getTotalAmount());
-        response.put("currency", "INR");
-        response.put("keyId", razorpayKeyId);
-        return response;
     }
 
     @Override

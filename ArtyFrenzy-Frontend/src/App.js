@@ -161,10 +161,6 @@ function RegisterForm({ onSwitchToLogin, onClose }) {
             </div>
             <div className="auth-field"><label className="auth-label">Confirm password</label><input className="auth-input" type={showPass ? "text" : "password"} name="confirm" placeholder="Re-enter your password" value={form.confirm} onChange={handleChange} /></div>
             <button className="auth-submit-btn" type="submit" disabled={loading}>{loading ? <span className="auth-spinner" /> : "Create account"}</button>
-            {/* <div className="auth-divider"><span>or sign up with</span></div>
-            <div className="auth-social-btns">
-              <button type="button" className="auth-social-btn">Google</button>
-            </div> */}
           </form>
         </div>
       </div>
@@ -194,7 +190,31 @@ function AppInner() {
   const [artworks, setArtworks] = useState([]);
   const [artworksLoading, setArtworksLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("All");
+
+  // ── USER-SPECIFIC CART LOGIC ──
   const [cart, setCart] = useState([]);
+
+  // Load cart when user logs in
+  useEffect(() => {
+    if (isLoggedIn && user?.id) {
+      try {
+        const savedCart = JSON.parse(localStorage.getItem(`af_cart_${user.id}`)) || [];
+        setCart(savedCart);
+      } catch {
+        setCart([]);
+      }
+    } else {
+      setCart([]); // Clear UI when logged out
+    }
+  }, [isLoggedIn, user?.id]);
+
+  // Save cart to localStorage whenever it changes
+  useEffect(() => {
+    if (isLoggedIn && user?.id) {
+      localStorage.setItem(`af_cart_${user.id}`, JSON.stringify(cart));
+    }
+  }, [cart, isLoggedIn, user?.id]);
+
   const [cartOpen, setCartOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [selectedArt, setSelectedArt] = useState(null);
@@ -245,7 +265,12 @@ function AppInner() {
 
   const removeFromCart = (id) => setCart(prev => prev.filter(i => i.id !== id));
   const total = cart.reduce((s, i) => s + i.price, 0);
-  const handleLogout = () => { logout(); setUserMenuOpen(false); showToast("Logged out successfully!"); };
+  
+  const handleLogout = () => { 
+    logout(); 
+    setUserMenuOpen(false); 
+    showToast("Logged out successfully!"); 
+  };
 
   return (
     <div className="app">

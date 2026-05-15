@@ -8,10 +8,32 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedToken = localStorage.getItem("af_token");
-    const savedUser = localStorage.getItem("af_user");
-    if (savedToken && savedUser) setUser(JSON.parse(savedUser));
-    setLoading(false);
+    try {
+      const savedToken = localStorage.getItem("af_token");
+      const savedUser = localStorage.getItem("af_user");
+      const savedExpiry = localStorage.getItem("af_expiry");
+      
+      // Check if 24 hours have passed
+      const isExpired = savedExpiry ? new Date().getTime() > Number(savedExpiry) : true;
+
+      if (isExpired) {
+        localStorage.removeItem("af_token");
+        localStorage.removeItem("af_user");
+        localStorage.removeItem("af_expiry");
+      }
+
+      if (savedToken && savedUser && !isExpired) {
+        setUser(JSON.parse(savedUser));
+      }
+    } catch (error) {
+      // If localStorage is corrupted, clear it so the app doesn't crash
+      console.error("Error reading auth data, clearing storage:", error);
+      localStorage.removeItem("af_token");
+      localStorage.removeItem("af_user");
+      localStorage.removeItem("af_expiry");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   const login = async (email, password) => {
@@ -21,6 +43,8 @@ export function AuthProvider({ children }) {
     setUser(userData);
     localStorage.setItem("af_token", token);
     localStorage.setItem("af_user", JSON.stringify(userData));
+    // Set expiry to 24 hours from now
+    localStorage.setItem("af_expiry", String(new Date().getTime() + 24 * 60 * 60 * 1000));
     return userData;
   };
 
@@ -31,13 +55,18 @@ export function AuthProvider({ children }) {
     setUser(userData);
     localStorage.setItem("af_token", token);
     localStorage.setItem("af_user", JSON.stringify(userData));
+    // Set expiry to 24 hours from now
+    localStorage.setItem("af_expiry", String(new Date().getTime() + 24 * 60 * 60 * 1000));
     return userData;
   };
 
-  const logout = () => {
+    const logout = () => {
     setUser(null);
     localStorage.removeItem("af_token");
     localStorage.removeItem("af_user");
+    localStorage.removeItem("af_expiry");
+    // REMOVED: localStorage.removeItem("af_cart");
+    // REMOVED: localStorage.removeItem("af_wishlist");
   };
 
   return (

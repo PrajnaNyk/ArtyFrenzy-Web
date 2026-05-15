@@ -51,7 +51,10 @@ export default function ReviewSection({ artworkId }) {
     e.preventDefault();
     if (newReview.rating === 0) { setError("Please select a rating."); return; }
     if (!newReview.comment.trim()) { setError("Please write a review."); return; }
+    
     setLoading(true);
+    setError(""); // Clear previous errors
+    
     try {
       await reviewAPI.add(user.id, artworkId, newReview.rating, newReview.comment);
       setNewReview({ rating: 0, comment: "" });
@@ -59,7 +62,9 @@ export default function ReviewSection({ artworkId }) {
       setTimeout(() => setSuccess(false), 3000);
       fetchReviews();
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to submit review.");
+      // UPDATED: Safely extract the error message from the backend GlobalExceptionHandler
+      const errorMsg = err.response?.data?.message || err.message || "Failed to submit review.";
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }

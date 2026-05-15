@@ -17,9 +17,14 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
+      // CHANGED: Also remove af_expiry so the auth state stays clean
       localStorage.removeItem("af_token");
       localStorage.removeItem("af_user");
-      window.location.reload();
+      localStorage.removeItem("af_expiry");
+      
+      // CHANGED: Instead of hard reloading, just reject the promise.
+      // Your AuthContext will naturally see the tokens are gone and log the user out.
+      // window.location.reload(); 
     }
     return Promise.reject(error);
   }
@@ -53,7 +58,7 @@ export const wishlistAPI = {
   check: (userId, artworkId) => api.get(`/wishlist/check?userId=${userId}&artworkId=${artworkId}`),
 };
 
-// ── Reviews ──
+// ── Reviews ── (No changes needed here!)
 export const reviewAPI = {
   getByArtwork: (artworkId) => api.get(`/reviews/artwork/${artworkId}`),
   add: (userId, artworkId, rating, comment) => api.post("/reviews", { userId, artworkId, rating, comment }),

@@ -25,7 +25,7 @@ export default function CheckoutPage({ cart, onClose, onPaymentSuccess }) {
     });
   };
 
-  const handlePayment = async () => {
+    const handlePayment = async () => {
     setLoading(true);
     setError("");
 
@@ -38,11 +38,14 @@ export default function CheckoutPage({ cart, onClose, onPaymentSuccess }) {
         return;
       }
 
+      // FIX: Calculate total WITH GST so Razorpay charges the correct amount
+      const totalWithGst = Math.round(total * 1.18);
+
       // Step 2 — Create order on backend
       const orderRes = await paymentAPI.createOrder({
         userId: user.id,
         artworkIds: cart.map(item => item.id),
-        totalAmount: total,
+        totalAmount: totalWithGst, // Send GST inclusive amount!
       });
 
       const { razorpayOrderId, amount, currency, keyId } = orderRes.data;
@@ -50,7 +53,7 @@ export default function CheckoutPage({ cart, onClose, onPaymentSuccess }) {
       // Step 3 — Open Razorpay checkout
       const options = {
         key: keyId,
-        amount: amount * 100,
+        amount: amount * 100, // Amount in paise
         currency: currency,
         name: "ArtyFrenzy",
         description: `Purchase of ${cart.length} artwork${cart.length > 1 ? "s" : ""}`,
@@ -70,7 +73,7 @@ export default function CheckoutPage({ cart, onClose, onPaymentSuccess }) {
             });
             onPaymentSuccess();
           } catch (err) {
-            setError("Payment verification failed. Please contact support.");
+            setError(err.response?.data?.message || "Payment verification failed. Please contact support.");
           }
         },
         modal: {
@@ -84,7 +87,9 @@ export default function CheckoutPage({ cart, onClose, onPaymentSuccess }) {
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (err) {
-      setError(err.response?.data?.message || "Payment failed. Please try again.");
+      // FIX: Extract the real error message from the backend instead of showing a generic one
+      const errorMsg = err.response?.data?.message || err.message || "Payment failed. Please try again.";
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }

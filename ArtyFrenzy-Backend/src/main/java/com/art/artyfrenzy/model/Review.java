@@ -31,5 +31,6 @@ public class Review {
     private String comment;
 
     @Column(nullable = false)
+    @Builder.Default // Otherwise builder sets it to null
     private LocalDateTime createdAt = LocalDateTime.now();
 }

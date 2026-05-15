@@ -1,0 +1,122 @@
+.admin-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  font-size: 16px;
+  color: #7C7168;
+}
+
+.admin-dashboard { display: flex; flex-direction: column; gap: 32px; }
+
+/* ── Stat Cards ── */
+.admin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.stat-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid rgba(44,40,37,0.07);
+  border-top: 3px solid;
+  box-shadow: 0 2px 12px rgba(28,25,23,0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.stat-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(28,25,23,0.1); }
+
+.stat-card-icon {
+  width: 48px; height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.stat-card-label { font-size: 12px; color: #7C7168; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.stat-card-value { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 600; color: #1C1917; line-height: 1; margin-bottom: 4px; }
+.stat-card-sub { font-size: 11px; color: #B4B2A9; }
+
+/* ── Sections ── */
+.admin-section { display: flex; flex-direction: column; gap: 16px; }
+.admin-section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: #1C1917;
+}
+
+/* ── Quick Actions ── */
+.admin-quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.quick-action-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid rgba(44,40,37,0.08);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.quick-action-card:hover {
+  border-color: #C9963A;
+  box-shadow: 0 4px 16px rgba(201,150,58,0.12);
+  transform: translateY(-2px);
+}
+
+.quick-action-icon { font-size: 28px; flex-shrink: 0; }
+.quick-action-title { font-size: 14px; font-weight: 500; color: #1C1917; margin-bottom: 3px; }
+.quick-action-desc { font-size: 12px; color: #7C7168; }
+
+/* ── Overview Grid ── */
+.admin-overview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.admin-overview-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 24px;
+  border: 1px solid rgba(44,40,37,0.07);
+  box-shadow: 0 2px 12px rgba(28,25,23,0.05);
+}
+
+.admin-overview-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: #1C1917;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(44,40,37,0.08);
+}
+
+.admin-overview-items { display: flex; flex-direction: column; gap: 14px; }
+.admin-overview-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: #7C7168;
+}
+.admin-overview-item strong { font-size: 16px; color: #1C1917; font-weight: 500; }
+
+@media (max-width: 768px) {
+  .admin-overview-grid { grid-template-columns: 1fr; }
+  .admin-stats-grid { grid-template-columns: 1fr 1fr; }
+}
