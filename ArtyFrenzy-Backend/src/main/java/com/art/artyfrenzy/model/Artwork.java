@@ -33,12 +33,10 @@ public class Artwork {
     @Column(length = 1000)
     private String description;
 
-    @Column
     private String imageUrl;
-
-    @Column
     private String tag;
 
     @Column(nullable = false)
-    private Boolean available = true;
+    @Builder.Default // This ensures new artworks default to "Available"
+    private String status = "Available"; 
 }

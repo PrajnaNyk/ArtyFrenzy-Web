@@ -32,7 +32,8 @@ public class User {
 
     @Column
     @Enumerated(EnumType.STRING)
-    private Role role = Role.USER;
+    @Builder.Default
+    private final Role role = Role.USER;
 
     public enum Role {
         USER, ADMIN

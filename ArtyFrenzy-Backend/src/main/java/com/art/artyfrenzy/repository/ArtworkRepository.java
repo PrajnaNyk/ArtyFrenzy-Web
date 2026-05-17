@@ -8,8 +8,9 @@ import java.util.List;
 
 @Repository
 public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
+    
+    List<Artwork> findByStatus(String status); 
     List<Artwork> findByCategory(String category);
-    List<Artwork> findByAvailableTrue();
     List<Artwork> findByArtistContainingIgnoreCase(String artist);
     List<Artwork> findByTitleContainingIgnoreCase(String title);
 }

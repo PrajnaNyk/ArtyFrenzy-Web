@@ -7,14 +7,10 @@ export default function AdminArtworks() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [newArtwork, setNewArtwork] = useState({
-    title: "",
-    artist: "",
-    price: "",
-    category: "Painting",
-    status: "Available",
-    image: ""
-  });
+  const [editingArtwork, setEditingArtwork] = useState(null); // Track if we are editing
+  
+  const emptyForm = { title: "", artist: "", price: "", category: "Painting", status: "Available", imageUrl: "", description: "", tag: "" };
+  const [form, setForm] = useState(emptyForm);
 
   useEffect(() => {
     fetchArtworks();
@@ -22,7 +18,7 @@ export default function AdminArtworks() {
 
   const fetchArtworks = async () => {
     try {
-      const res = await artworkAPI.getAll();
+      const res = await artworkAPI.getAllAdmin(); // Calls /api/artworks/admin/all
       setArtworks(res.data);
     } catch (err) {
       console.error("Failed to fetch artworks:", err);
@@ -31,15 +27,33 @@ export default function AdminArtworks() {
     }
   };
 
-  const handleAddArtwork = async (e) => {
+  const openAddModal = () => {
+    setEditingArtwork(null);
+    setForm(emptyForm);
+    setShowModal(true);
+  };
+
+  const openEditModal = (art) => {
+    setEditingArtwork(art);
+    setForm({ ...art, price: art.price.toString() }); // Convert price to string for input
+    setShowModal(true);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await artworkAPI.create(newArtwork);
+      const payload = { ...form, price: parseFloat(form.price) }; // Convert price back to number
+      
+      if (editingArtwork) {
+        await artworkAPI.update(editingArtwork.id, payload); // PUT request
+      } else {
+        await artworkAPI.create(payload); // POST request
+      }
+      
       setShowModal(false);
-      setNewArtwork({ title: "", artist: "", price: "", category: "Painting", status: "Available", image: "" });
       fetchArtworks(); // Refresh list
     } catch (err) {
-      console.error("Failed to add artwork:", err);
+      console.error("Failed to save artwork:", err);
     }
   };
 
@@ -72,7 +86,7 @@ export default function AdminArtworks() {
             {artworks.length} total artworks
           </p>
         </div>
-        <button className="admin-btn-primary" onClick={() => setShowModal(true)}>
+        <button className="admin-btn-primary" onClick={openAddModal}>
           <span>+</span> Add Artwork
         </button>
       </div>
@@ -109,7 +123,7 @@ export default function AdminArtworks() {
                   <td>
                     <div className="artwork-info">
                       <img 
-                        src={art.image || "https://via.placeholder.com/42"} 
+                        src={art.imageUrl || "https://via.placeholder.com/42"} 
                         alt={art.title} 
                         className="artwork-thumb" 
                       />
@@ -129,7 +143,7 @@ export default function AdminArtworks() {
                     </span>
                   </td>
                   <td>
-                    <button className="action-btn">Edit</button>
+                    <button className="action-btn" onClick={() => openEditModal(art)}>Edit</button>
                     <button className="action-btn delete" onClick={() => handleDelete(art.id)}>Delete</button>
                   </td>
                 </tr>
@@ -139,83 +153,76 @@ export default function AdminArtworks() {
         )}
       </div>
 
-      {/* Add Modal */}
+      {/* Add/Edit Modal */}
       {showModal && (
         <div className="admin-modal-overlay" onClick={() => setShowModal(false)}>
           <div className="admin-modal" onClick={e => e.stopPropagation()}>
-            <h3 className="admin-modal-title">Add New Artwork</h3>
-            <form onSubmit={handleAddArtwork}>
+            <h3 className="admin-modal-title">
+              {editingArtwork ? "Edit Artwork" : "Add New Artwork"}
+            </h3>
+            <form onSubmit={handleSubmit}>
               <div className="admin-form-group">
                 <label className="admin-form-label">Title</label>
-                <input
-                  className="admin-form-input"
-                  required
-                  value={newArtwork.title}
-                  onChange={e => setNewArtwork({ ...newArtwork, title: e.target.value })}
-                />
+                <input className="admin-form-input" required value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} />
               </div>
+              
               <div className="admin-form-row">
                 <div className="admin-form-group">
                   <label className="admin-form-label">Artist</label>
-                  <input
-                    className="admin-form-input"
-                    required
-                    value={newArtwork.artist}
-                    onChange={e => setNewArtwork({ ...newArtwork, artist: e.target.value })}
-                  />
+                  <input className="admin-form-input" required value={form.artist} onChange={e => setForm({ ...form, artist: e.target.value })} />
                 </div>
                 <div className="admin-form-group">
                   <label className="admin-form-label">Price (₹)</label>
-                  <input
-                    className="admin-form-input"
-                    type="number"
-                    required
-                    value={newArtwork.price}
-                    onChange={e => setNewArtwork({ ...newArtwork, price: e.target.value })}
-                  />
+                  <input className="admin-form-input" type="number" step="0.01" required value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} />
                 </div>
               </div>
+
               <div className="admin-form-row">
                 <div className="admin-form-group">
                   <label className="admin-form-label">Category</label>
-                  <select
-                    className="admin-form-input"
-                    value={newArtwork.category}
-                    onChange={e => setNewArtwork({ ...newArtwork, category: e.target.value })}
-                  >
-                    <option>Painting</option>
-                    <option>Sculpture</option>
-                    <option>Digital</option>
-                    <option>Photography</option>
+                  <select className="admin-form-input" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
+                    <option>Abstract</option>
+                    <option>Landscape</option>
+                    <option>Impressionism</option>
+                    <option>Modern</option>
+                    <option>Floral</option>
+                    <option>Portrait</option>
                   </select>
                 </div>
                 <div className="admin-form-group">
                   <label className="admin-form-label">Status</label>
-                  <select
-                    className="admin-form-input"
-                    value={newArtwork.status}
-                    onChange={e => setNewArtwork({ ...newArtwork, status: e.target.value })}
-                  >
+                  <select className="admin-form-input" value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}>
                     <option>Available</option>
                     <option>Sold</option>
                   </select>
                 </div>
               </div>
+
+              <div className="admin-form-group">
+                <label className="admin-form-label">Tag (Optional)</label>
+                <input className="admin-form-input" placeholder="e.g. New, Featured" value={form.tag} onChange={e => setForm({ ...form, tag: e.target.value })} />
+              </div>
+
               <div className="admin-form-group">
                 <label className="admin-form-label">Image URL</label>
-                <input
-                  className="admin-form-input"
-                  placeholder="https://..."
-                  value={newArtwork.image}
-                  onChange={e => setNewArtwork({ ...newArtwork, image: e.target.value })}
+                <input className="admin-form-input" placeholder="https://..." value={form.imageUrl} onChange={e => setForm({ ...form, imageUrl: e.target.value })} />
+              </div>
+
+              <div className="admin-form-group">
+                <label className="admin-form-label">Description</label>
+                <textarea 
+                  className="admin-form-input admin-form-textarea" 
+                  value={form.description} 
+                  onChange={e => setForm({ ...form, description: e.target.value })} 
                 />
               </div>
+
               <div className="admin-form-actions">
                 <button type="button" className="admin-btn-cancel" onClick={() => setShowModal(false)}>
                   Cancel
                 </button>
                 <button type="submit" className="admin-btn-primary">
-                  Save Artwork
+                  {editingArtwork ? "Update Artwork" : "Save Artwork"}
                 </button>
               </div>
             </form>

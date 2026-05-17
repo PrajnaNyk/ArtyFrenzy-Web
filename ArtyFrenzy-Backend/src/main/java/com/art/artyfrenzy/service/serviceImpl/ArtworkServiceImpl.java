@@ -3,7 +3,6 @@ package com.art.artyfrenzy.service.serviceImpl;
 import com.art.artyfrenzy.model.Artwork;
 import com.art.artyfrenzy.repository.ArtworkRepository;
 import com.art.artyfrenzy.service.ArtworkService;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,12 +16,12 @@ public class ArtworkServiceImpl implements ArtworkService {
 
     @Override
     public List<Artwork> getAllArtworks() {
-        return artworkRepository.findAll();
+        return artworkRepository.findAll(); // Returns BOTH Available and Sold
     }
 
     @Override
     public List<Artwork> getAvailableArtworks() {
-        return artworkRepository.findByAvailableTrue();
+        return artworkRepository.findByStatus("Available"); // Returns ONLY Available
     }
 
     @Override
@@ -51,7 +50,7 @@ public class ArtworkServiceImpl implements ArtworkService {
         existing.setDescription(updatedArtwork.getDescription());
         existing.setImageUrl(updatedArtwork.getImageUrl());
         existing.setTag(updatedArtwork.getTag());
-        existing.setAvailable(updatedArtwork.getAvailable());
+        existing.setStatus(updatedArtwork.getStatus()); // Ensure status is updated
         return artworkRepository.save(existing);
     }
 

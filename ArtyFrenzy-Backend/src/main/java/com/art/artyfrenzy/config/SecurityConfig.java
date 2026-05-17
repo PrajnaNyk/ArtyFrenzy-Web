@@ -2,13 +2,13 @@ package com.art.artyfrenzy.config;
 
 import com.art.artyfrenzy.repository.UserRepository;
 import com.art.artyfrenzy.security.JwtAuthFilter;
-//import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -27,6 +27,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
@@ -45,14 +46,20 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public
                         .requestMatchers("/api/auth/**").permitAll()
+                        
+                        // FIX: Secure the Admin GET endpoint specifically FIRST
+                        .requestMatchers(HttpMethod.GET, "/api/artworks/admin/all").hasRole("ADMIN")
+                        
                         .requestMatchers(HttpMethod.GET, "/api/artworks/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/artists/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
+                        
                         // Protected
                         .requestMatchers(HttpMethod.POST, "/api/reviews/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/reviews/**").authenticated()
                         .requestMatchers("/api/wishlist/**").authenticated()
                         .requestMatchers("/api/payments/**").authenticated()
+                        
                         .requestMatchers(HttpMethod.POST, "/api/artworks/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/artworks/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/artworks/**").hasRole("ADMIN")
@@ -75,7 +82,7 @@ public class SecurityConfig {
                 .map(user -> (UserDetails) org.springframework.security.core.userdetails.User
                         .withUsername(user.getEmail())
                         .password(user.getPassword())
-                        .roles(user.getRole().name())
+                        .roles(user.getRole().name()) // This automatically maps to ROLE_ADMIN
                         .build()
                 )
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
@@ -94,7 +101,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000"));
+        // FIX: Added localhost:5173 for Vite React apps!
+        config.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:5173"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
