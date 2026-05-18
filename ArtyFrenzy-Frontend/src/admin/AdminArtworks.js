@@ -7,7 +7,7 @@ export default function AdminArtworks() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [editingArtwork, setEditingArtwork] = useState(null); // Track if we are editing
+  const [editingArtwork, setEditingArtwork] = useState(null);
   
   const emptyForm = { title: "", artist: "", price: "", category: "Painting", status: "Available", imageUrl: "", description: "", tag: "" };
   const [form, setForm] = useState(emptyForm);
@@ -18,7 +18,7 @@ export default function AdminArtworks() {
 
   const fetchArtworks = async () => {
     try {
-      const res = await artworkAPI.getAllAdmin(); // Calls /api/artworks/admin/all
+      const res = await artworkAPI.getAllAdmin();
       setArtworks(res.data);
     } catch (err) {
       console.error("Failed to fetch artworks:", err);
@@ -35,35 +35,59 @@ export default function AdminArtworks() {
 
   const openEditModal = (art) => {
     setEditingArtwork(art);
-    setForm({ ...art, price: art.price.toString() }); // Convert price to string for input
+    setForm({ ...art, price: art.price?.toString() || "" }); 
     setShowModal(true);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // FIX: Safely parse price. If invalid, stop submission.
+    const parsedPrice = parseFloat(form.price);
+    if (isNaN(parsedPrice)) {
+      alert("Please enter a valid price.");
+      return; 
+    }
+
+    // FIX: Construct a clean payload matching your Spring Boot Entity exactly.
+    // Convert empty strings to null so Spring Boot doesn't complain about blank constraints.
+    const payload = {
+      title: form.title,
+      artist: form.artist,
+      price: parsedPrice, // Send as a proper Java Double number
+      category: form.category,
+      status: form.status,
+      imageUrl: form.imageUrl.trim() || null,
+      description: form.description.trim() || null,
+      tag: form.tag.trim() || null,
+    };
+
     try {
-      const payload = { ...form, price: parseFloat(form.price) }; // Convert price back to number
-      
       if (editingArtwork) {
-        await artworkAPI.update(editingArtwork.id, payload); // PUT request
+        await artworkAPI.update(editingArtwork.id, payload);
       } else {
-        await artworkAPI.create(payload); // POST request
+        await artworkAPI.create(payload);
       }
       
       setShowModal(false);
-      fetchArtworks(); // Refresh list
+      fetchArtworks(); 
     } catch (err) {
-      console.error("Failed to save artwork:", err);
+      console.error("Failed to save artwork:", err.response?.data || err.message);
+      alert("Failed to save artwork. Check console for details.");
     }
   };
 
   const handleDelete = async (id) => {
+    // FIX: Safety check to prevent /api/artworks/undefined (404 error)
+    if (!id) return; 
+    
     if (!window.confirm("Are you sure you want to delete this artwork?")) return;
     try {
       await artworkAPI.delete(id);
       fetchArtworks();
     } catch (err) {
-      console.error("Failed to delete artwork:", err);
+      console.error("Failed to delete artwork:", err.response?.data || err.message);
+      alert("Failed to delete artwork. It might be linked to an Order.");
     }
   };
 

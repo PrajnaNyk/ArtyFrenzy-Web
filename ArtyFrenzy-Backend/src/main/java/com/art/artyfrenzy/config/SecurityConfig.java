@@ -38,18 +38,18 @@ public class SecurityConfig {
         this.userRepository = userRepository;
     }
 
-    @Bean
+        @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
+                        // Explicitly allow all OPTIONS requests (CORS Preflight)
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        
                         // Public
                         .requestMatchers("/api/auth/**").permitAll()
-                        
-                        // FIX: Secure the Admin GET endpoint specifically FIRST
                         .requestMatchers(HttpMethod.GET, "/api/artworks/admin/all").hasRole("ADMIN")
-                        
                         .requestMatchers(HttpMethod.GET, "/api/artworks/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/artists/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll()
@@ -60,6 +60,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/wishlist/**").authenticated()
                         .requestMatchers("/api/payments/**").authenticated()
                         
+                        // Admin Only
                         .requestMatchers(HttpMethod.POST, "/api/artworks/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/artworks/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/artworks/**").hasRole("ADMIN")
@@ -68,9 +69,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/artists/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

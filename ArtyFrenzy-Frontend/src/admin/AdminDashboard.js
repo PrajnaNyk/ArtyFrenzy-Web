@@ -17,7 +17,7 @@ function StatCard({ icon, label, value, sub, color }) {
   );
 }
 
-export default function AdminDashboard() {
+export default function AdminDashboard({ onNavigate }) { // <-- ADDED onNavigate PROP
   const [stats, setStats] = useState({
     artworks: 0,
     artists: 0,
@@ -36,7 +36,7 @@ export default function AdminDashboard() {
   const fetchStats = async () => {
     try {
       const [artworksRes, artistsRes] = await Promise.all([
-        artworkAPI.getAll(),
+        artworkAPI.getAllAdmin(), // <-- CHANGED from getAll() so it counts sold artworks too!
         artistAPI.getAll(),
       ]);
 
@@ -98,27 +98,32 @@ export default function AdminDashboard() {
       <div className="admin-section">
         <h2 className="admin-section-title">Quick Actions</h2>
         <div className="admin-quick-actions">
-          <div className="quick-action-card">
+          
+          {/* ADDED onClick HANDLERS */}
+          <div className="quick-action-card" onClick={() => onNavigate("artworks")} style={{ cursor: "pointer" }}>
             <span className="quick-action-icon">🎨</span>
             <div>
               <p className="quick-action-title">Add New Artwork</p>
               <p className="quick-action-desc">Upload a new artwork to the gallery</p>
             </div>
           </div>
-          <div className="quick-action-card">
+
+          <div className="quick-action-card" onClick={() => onNavigate("artists")} style={{ cursor: "pointer" }}>
             <span className="quick-action-icon">✏️</span>
             <div>
               <p className="quick-action-title">Add New Artist</p>
               <p className="quick-action-desc">Register a new artist profile</p>
             </div>
           </div>
-          <div className="quick-action-card">
+
+          <div className="quick-action-card" onClick={() => onNavigate("orders")} style={{ cursor: "pointer" }}>
             <span className="quick-action-icon">📦</span>
             <div>
               <p className="quick-action-title">View Orders</p>
               <p className="quick-action-desc">Manage and update order status</p>
             </div>
           </div>
+
         </div>
       </div>
 

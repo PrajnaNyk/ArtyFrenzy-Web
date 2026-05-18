@@ -25,7 +25,7 @@ public class ArtworkController {
 
     // ADMIN - Returns ALL artworks (Available + Sold)
     @GetMapping("/admin/all")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<Artwork>> getAllArtworksForAdmin() {
         return ResponseEntity.ok(artworkService.getAllArtworks());
     }
@@ -41,19 +41,19 @@ public class ArtworkController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Artwork> createArtwork(@RequestBody Artwork artwork) {
         return ResponseEntity.ok(artworkService.createArtwork(artwork));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Artwork> updateArtwork(@PathVariable Long id, @RequestBody Artwork artwork) {
         return ResponseEntity.ok(artworkService.updateArtwork(id, artwork));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteArtwork(@PathVariable Long id) {
         artworkService.deleteArtwork(id);
         return ResponseEntity.noContent().build();

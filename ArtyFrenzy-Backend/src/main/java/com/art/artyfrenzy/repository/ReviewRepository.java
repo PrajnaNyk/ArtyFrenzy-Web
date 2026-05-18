@@ -10,4 +10,7 @@ import java.util.List;
 public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<Review> findByArtworkIdOrderByCreatedAtDesc(Long artworkId);
     boolean existsByUserIdAndArtworkId(Long userId, Long artworkId);
+
+    // ADD THIS: Custom delete method
+    void deleteByArtworkId(Long artworkId);
 }

@@ -48,8 +48,11 @@ export const artworkAPI = {
 // ── Artists ──
 export const artistAPI = {
   getAll: () => api.get("/artists"),
-  getByName: (name) => api.get(`/artists/name/${encodeURIComponent(name)}`),
   getById: (id) => api.get(`/artists/${id}`),
+  getByName: (name) => api.get(`/artists/name/${encodeURIComponent(name)}`),
+  create: (data) => api.post("/artists", data),
+  update: (id, data) => api.put(`/artists/${id}`, data),
+  delete: (id) => api.delete(`/artists/${id}`),
 };
 
 // ── Wishlist ──
