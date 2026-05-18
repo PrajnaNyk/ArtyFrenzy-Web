@@ -1,5 +1,7 @@
 package com.art.artyfrenzy.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,6 +18,7 @@ public class OrderItem {
     private Long id;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 

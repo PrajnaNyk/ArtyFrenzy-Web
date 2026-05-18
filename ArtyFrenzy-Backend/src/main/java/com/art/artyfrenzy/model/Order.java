@@ -2,6 +2,7 @@ package com.art.artyfrenzy.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -38,10 +39,20 @@ public class Order {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @Builder.Default 
     private OrderStatus status = OrderStatus.PENDING;
 
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
+    @Builder.Default //Tells Lombok to respect this default value
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    //Extra safety net to ensure createdAt is NEVER null before saving
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+    }
 
     public enum OrderStatus {
         PENDING, PAID, FAILED, CANCELLED

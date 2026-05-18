@@ -25,7 +25,7 @@ export default function CheckoutPage({ cart, onClose, onPaymentSuccess }) {
     });
   };
 
-    const handlePayment = async () => {
+  const handlePayment = async () => {
     setLoading(true);
     setError("");
 
@@ -38,31 +38,42 @@ export default function CheckoutPage({ cart, onClose, onPaymentSuccess }) {
         return;
       }
 
-      // FIX: Calculate total WITH GST so Razorpay charges the correct amount
+      // Calculate total WITH GST so Razorpay charges the correct amount
       const totalWithGst = Math.round(total * 1.18);
 
       // Step 2 — Create order on backend
       const orderRes = await paymentAPI.createOrder({
         userId: user.id,
         artworkIds: cart.map(item => item.id),
-        totalAmount: totalWithGst, // Send GST inclusive amount!
+        totalAmount: totalWithGst, 
       });
 
       const { razorpayOrderId, amount, currency, keyId } = orderRes.data;
 
       // Step 3 — Open Razorpay checkout
       const options = {
-        key: keyId,
+        key: keyId, // Ensure this is your rzp_test_ key from the backend
         amount: amount * 100, // Amount in paise
         currency: currency,
         name: "ArtyFrenzy",
         description: `Purchase of ${cart.length} artwork${cart.length > 1 ? "s" : ""}`,
         order_id: razorpayOrderId,
+        
+        // ✅ FIX: HIDE QR CODES, UPI & WALLETS - Only show Card for easy testing!
+        method: {
+          card: true,
+          netbanking: true,
+          upi: false,
+          wallet: false,
+          emi: false,
+        },
+        
         prefill: {
           name: user.name,
           email: user.email,
         },
-        theme: { color: "#C9963A" },
+        theme: { color: "#1C1917" }, // Matched your website dark theme
+        
         handler: async (response) => {
           // Step 4 — Verify payment on backend
           try {
@@ -87,7 +98,6 @@ export default function CheckoutPage({ cart, onClose, onPaymentSuccess }) {
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (err) {
-      // FIX: Extract the real error message from the backend instead of showing a generic one
       const errorMsg = err.response?.data?.message || err.message || "Payment failed. Please try again.";
       setError(errorMsg);
     } finally {
@@ -148,6 +158,11 @@ export default function CheckoutPage({ cart, onClose, onPaymentSuccess }) {
         </div>
 
         {error && <div className="checkout-error">{error}</div>}
+
+        {/* ✅ ADDED: Test Mode Instructions Banner */}
+        <div style={{ background: "#FFF3E0", padding: "12px 16px", borderRadius: "10px", marginBottom: "16px", fontSize: "13px", color: "#E65100", textAlign: "center", border: "1px solid #FFE0B2" }}>
+          🧪 <strong>Razorpay Test Mode:</strong> Use Card Number <strong>4111 1111 1111 1111</strong>, any future expiry, any CVV.
+        </div>
 
         {/* Pay Button */}
         <button
