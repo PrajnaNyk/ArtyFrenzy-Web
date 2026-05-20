@@ -33,20 +33,27 @@ export default function AdminDashboard({ onNavigate }) { // <-- ADDED onNavigate
     fetchStats();
   }, []);
 
-  const fetchStats = async () => {
+    const fetchStats = async () => {
     try {
-      const [artworksRes, artistsRes] = await Promise.all([
-        artworkAPI.getAllAdmin(), // <-- CHANGED from getAll() so it counts sold artworks too!
+      const [artworksRes, artistsRes, statsRes] = await Promise.all([
+        artworkAPI.getAllAdmin(),
         artistAPI.getAll(),
+        paymentAPI.getAdminStats(), 
       ]);
 
       const artworks = artworksRes.data;
       const artists = artistsRes.data;
+      const statsData = statsRes.data; // ✅ EXTRACT STATS
 
       setStats(prev => ({
         ...prev,
         artworks: artworks.length,
         artists: artists.length,
+        orders: statsData.totalOrders || 0,       // ✅ UPDATE STATE
+        revenue: statsData.totalRevenue || 0,     // ✅ UPDATE STATE
+        paidOrders: statsData.paidOrders || 0,    // ✅ UPDATE STATE
+        pendingOrders: statsData.pendingOrders || 0, // ✅ UPDATE STATE
+        failedOrders: statsData.failedOrders || 0,
       }));
     } catch (err) {
       console.error("Failed to fetch stats:", err);

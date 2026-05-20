@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom"; // <-- Added Router imports
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./auth/AuthContext";
 import { WishlistProvider } from "./context/WishlistContext";
 import { RecentlyViewedProvider, useRecentlyViewed } from "./context/RecentlyViewedContext";
@@ -10,7 +10,8 @@ import WishlistPage from "./pages/WishlistPage";
 import ArtistProfile from "./pages/ArtistProfile";
 import { artworkAPI } from "./services/api";
 import CheckoutPage from "./pages/CheckoutPage";
-import AdminApp from "./admin/AdminApp"; // <-- Import AdminApp
+import AdminApp from "./admin/AdminApp";
+import UserOrders from "./pages/UserOrders"; // <-- 1. ADDED IMPORT
 import "./App.css";
 import "./auth/Auth.css";
 
@@ -28,7 +29,7 @@ function AdminRoute() {
 // ── Login Form ──
 function LoginForm({ onSwitchToRegister, onClose }) {
   const { login } = useAuth();
-  const navigate = useNavigate(); // <-- Hook for redirection
+  const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -41,13 +42,11 @@ function LoginForm({ onSwitchToRegister, onClose }) {
     if (!form.email || !form.password) { setError("Please fill in all fields."); return; }
     setLoading(true);
     try {
-      const userData = await login(form.email, form.password); // <-- Get user data back
-      
-      // ── ROLE BASED REDIRECTION ──
+      const userData = await login(form.email, form.password);
       if (userData.role === "ADMIN") {
-        navigate("/admin"); // Redirect to admin dashboard
+        navigate("/admin");
       } else {
-        onClose(); // Close modal for regular users
+        onClose();
       }
     } catch (err) {
       setError(err.response?.data?.message || "Invalid email or password.");
@@ -204,11 +203,12 @@ function AuthModal({ mode, onClose }) {
 // ── Main App (User Site) ──
 function AppInner() {
   const { user, logout, isLoggedIn } = useAuth();
-  const navigate = useNavigate(); // <-- Added for admin redirect link
+  const navigate = useNavigate();
   const { addToRecentlyViewed } = useRecentlyViewed();
   const [artworks, setArtworks] = useState([]);
   const [artworksLoading, setArtworksLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState("All");
+  const [ordersOpen, setOrdersOpen] = useState(false); // State exists
 
   // ── USER-SPECIFIC CART LOGIC ──
   const [cart, setCart] = useState([]);
@@ -223,7 +223,7 @@ function AppInner() {
         setCart([]);
       }
     } else {
-      setCart([]); // Clear UI when logged out
+      setCart([]);
     }
   }, [isLoggedIn, user?.id]);
 
@@ -309,6 +309,16 @@ function AppInner() {
         </div>
       )}
 
+      {/* ── 2. ADDED ORDERS MODAL ── */}
+      {ordersOpen && (
+        <div className="auth-modal-overlay" onClick={() => setOrdersOpen(false)}>
+          <div className="wishlist-modal-box" onClick={e => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setOrdersOpen(false)}>✕</button>
+            <UserOrders onClose={() => setOrdersOpen(false)} />
+          </div>
+        </div>
+      )}
+
       {/* ── Payment ── */}
       {checkoutOpen && (
         <CheckoutPage
@@ -354,7 +364,10 @@ function AppInner() {
                   )}
 
                   <button className="dropdown-item" onClick={() => { setWishlistOpen(true); setUserMenuOpen(false); }}>♡ My Wishlist</button>
-                  <button className="dropdown-item">📦 My Orders</button>
+                  
+                  {/* ── 3. ADDED ONCLICK TO ORDERS BUTTON ── */}
+                  <button className="dropdown-item" onClick={() => { setOrdersOpen(true); setUserMenuOpen(false); }}>📦 My Orders</button>
+                  
                   <button className="dropdown-item">⚙️ Settings</button>
                   <div className="user-dropdown-divider" />
                   <button className="dropdown-item dropdown-logout" onClick={handleLogout}>↩ Sign out</button>

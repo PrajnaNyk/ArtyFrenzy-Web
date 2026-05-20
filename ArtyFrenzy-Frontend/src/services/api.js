@@ -75,6 +75,7 @@ export const paymentAPI = {
   createOrder: (data) => api.post("/payments/create-order", data),
   verifyPayment: (data) => api.post("/payments/verify", data),
   getUserOrders: (userId) => api.get(`/payments/orders/${userId}`),
+  getAdminStats: () => api.get("/payments/admin/stats"),
 };
 
 export default api;
