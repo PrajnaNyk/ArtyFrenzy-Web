@@ -46,6 +46,7 @@ public class ArtistServiceImpl implements ArtistService {
         existing.setMedium(updated.getMedium());
         existing.setInstagram(updated.getInstagram());
         existing.setWebsite(updated.getWebsite());
+        existing.setAvatarColor(updated.getAvatarColor()); // <-- ADDED THIS LINE
         return artistRepository.save(existing);
     }
 

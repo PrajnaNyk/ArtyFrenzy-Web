@@ -32,23 +32,33 @@ export default function AdminArtists() {
     setShowModal(true);
   };
 
-  const openEditModal = (artist) => {
+    const openEditModal = (artist) => {
     setEditingArtist(artist);
-    setForm({ ...artist });
+    // FIX: Convert nulls to empty strings so React inputs don't throw warnings
+    setForm({
+      ...artist,
+      bio: artist.bio || "",
+      style: artist.style || "",
+      medium: artist.medium || "",
+      instagram: artist.instagram || "",
+      website: artist.website || "",
+      avatarColor: artist.avatarColor || "#C9963A",
+    });
     setShowModal(true);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // FIX: Add (form.field || "") before .trim() so it doesn't crash on null
       const payload = {
         name: form.name,
         location: form.location,
-        bio: form.bio.trim() || null,
-        style: form.style.trim() || null,
-        medium: form.medium.trim() || null,
-        instagram: form.instagram.trim() || null,
-        website: form.website.trim() || null,
+        bio: (form.bio || "").trim() || null,
+        style: (form.style || "").trim() || null,
+        medium: (form.medium || "").trim() || null,
+        instagram: (form.instagram || "").trim() || null,
+        website: (form.website || "").trim() || null,
         avatarColor: form.avatarColor || null,
       };
 

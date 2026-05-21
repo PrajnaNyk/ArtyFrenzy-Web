@@ -11,7 +11,7 @@ import ArtistProfile from "./pages/ArtistProfile";
 import { artworkAPI } from "./services/api";
 import CheckoutPage from "./pages/CheckoutPage";
 import AdminApp from "./admin/AdminApp";
-import UserOrders from "./pages/UserOrders"; // <-- 1. ADDED IMPORT
+import UserOrders from "./pages/UserOrders"; 
 import "./App.css";
 import "./auth/Auth.css";
 
