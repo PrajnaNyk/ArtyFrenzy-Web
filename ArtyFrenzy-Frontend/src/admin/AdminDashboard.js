@@ -43,16 +43,16 @@ export default function AdminDashboard({ onNavigate }) { // <-- ADDED onNavigate
 
       const artworks = artworksRes.data;
       const artists = artistsRes.data;
-      const statsData = statsRes.data; // ✅ EXTRACT STATS
+      const statsData = statsRes.data; //EXTRACT STATS
 
       setStats(prev => ({
         ...prev,
         artworks: artworks.length,
         artists: artists.length,
-        orders: statsData.totalOrders || 0,       // ✅ UPDATE STATE
-        revenue: statsData.totalRevenue || 0,     // ✅ UPDATE STATE
-        paidOrders: statsData.paidOrders || 0,    // ✅ UPDATE STATE
-        pendingOrders: statsData.pendingOrders || 0, // ✅ UPDATE STATE
+        orders: statsData.totalOrders || 0,       
+        revenue: statsData.totalRevenue || 0,     
+        paidOrders: statsData.paidOrders || 0,   
+        pendingOrders: statsData.pendingOrders || 0, 
         failedOrders: statsData.failedOrders || 0,
       }));
     } catch (err) {

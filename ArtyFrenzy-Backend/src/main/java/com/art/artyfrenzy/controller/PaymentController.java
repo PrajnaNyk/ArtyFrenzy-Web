@@ -15,10 +15,12 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/payments")
+@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
 public class PaymentController {
 
     private final PaymentService paymentService;
     private final OrderRepository orderRepository;
+    
     public PaymentController(PaymentService paymentService, OrderRepository orderRepository) {
         this.paymentService = paymentService;
         this.orderRepository = orderRepository;
@@ -42,15 +44,23 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.getUserOrders(userId));
     }
 
-    // Get stats for Admin Dashboard
+    // ✅ FIXED: Get stats for Admin Dashboard
     @GetMapping("/admin/stats")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, Object>> getAdminStats() {
-        long paidOrders = orderRepository.countByStatus(Order.OrderStatus.PAID);
+        // 1. Paid orders should include Shipped and Delivered (money was collected)
+        long paidOrders = orderRepository.countByStatusIn(
+            List.of(Order.OrderStatus.PAID, Order.OrderStatus.SHIPPED, Order.OrderStatus.DELIVERED)
+        );
+        
         long pendingOrders = orderRepository.countByStatus(Order.OrderStatus.PENDING);
         long failedOrders = orderRepository.countByStatus(Order.OrderStatus.FAILED);
+        
+        // 2. Calculate revenue for all successfully paid orders (regardless of shipping status)
         double totalRevenue = orderRepository.calculateTotalRevenue();
-        long totalOrders = paidOrders + pendingOrders + failedOrders;
+        
+        // 3. Total orders ever placed
+        long totalOrders = orderRepository.count();
 
         Map<String, Object> stats = new HashMap<>();
         stats.put("totalOrders", totalOrders);
@@ -62,4 +72,20 @@ public class PaymentController {
         return ResponseEntity.ok(stats);
     }
 
+    // Get all orders for Admin
+    @GetMapping("/admin/orders")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<Order>> getAllOrders() {
+        return ResponseEntity.ok(orderRepository.findAllOrdersForAdmin());
+    }
+
+    // Update order status (e.g., mark as shipped)
+    @PutMapping("/admin/orders/{id}/status")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Order> updateOrderStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+        order.setStatus(Order.OrderStatus.valueOf(body.get("status")));
+        return ResponseEntity.ok(orderRepository.save(order));
+    }
 }

@@ -54,7 +54,7 @@ public class Order {
         }
     }
 
-    public enum OrderStatus {
-        PENDING, PAID, FAILED, CANCELLED
+        public enum OrderStatus {
+        PENDING, PAID, FAILED, CANCELLED, SHIPPED, DELIVERED
     }
 }

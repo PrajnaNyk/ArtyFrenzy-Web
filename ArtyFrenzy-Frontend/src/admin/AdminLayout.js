@@ -7,7 +7,7 @@ const navItems = [
   { key: "artworks", icon: "🎨", label: "Artworks" },
   { key: "artists", icon: "✏️", label: "Artists" },
   { key: "orders", icon: "📦", label: "Orders" },
-  { key: "users", icon: "👥", label: "Users" },
+  //{ key: "users", icon: "👥", label: "Users" },
 ];
 
 export default function AdminLayout({ activePage, onNavigate, children }) {

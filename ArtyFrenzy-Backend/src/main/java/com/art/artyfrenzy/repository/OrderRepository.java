@@ -14,8 +14,15 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Optional<Order> findByRazorpayOrderId(String razorpayOrderId);
 
     long countByStatus(Order.OrderStatus status); 
-    Long countByStatusNot(Order.OrderStatus status); // Count pending/failed
     
-    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status = 'PAID'")
-    Double calculateTotalRevenue(); // Sums up all paid order amounts
+    // Count orders that have successfully been paid (even if shipped/delivered later)
+    long countByStatusIn(List<Order.OrderStatus> statuses);
+    
+    // Revenue stays even if order moves to Shipped/Delivered
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status IN ('PAID', 'SHIPPED', 'DELIVERED')")
+    Double calculateTotalRevenue();
+
+    // Fetch all orders for Admin with User and Items
+    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.items i LEFT JOIN FETCH i.artwork LEFT JOIN FETCH o.user ORDER BY o.createdAt DESC")
+    List<Order> findAllOrdersForAdmin();
 }

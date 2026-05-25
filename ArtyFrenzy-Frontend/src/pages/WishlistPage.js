@@ -43,7 +43,12 @@ export default function WishlistPage({ onAddToCart, cart, onClose }) {
           {wishlist.map(art => (
             <div className="wishlist-card" key={art.id}>
               <div className="wishlist-card-img">
-                <img src={art.image} alt={art.title} />
+                {/* ✅ FIX: Changed art.image to art.imageUrl and added fallback */}
+                <img 
+                  src={art.imageUrl || "https://via.placeholder.com/300x200?text=Art"} 
+                  alt={art.title} 
+                  onError={(e) => { e.target.onerror = null; e.target.src="https://via.placeholder.com/300x200?text=Art" }}
+                />
                 <button className="wishlist-remove-btn" onClick={() => removeFromWishlist(art.id)}>✕</button>
               </div>
               <div className="wishlist-card-info">
@@ -51,7 +56,7 @@ export default function WishlistPage({ onAddToCart, cart, onClose }) {
                 <h3 className="wishlist-card-title">{art.title}</h3>
                 <p className="wishlist-card-artist">by {art.artist}</p>
                 <div className="wishlist-card-footer">
-                  <span className="wishlist-card-price">₹{art.price.toLocaleString()}</span>
+                  <span className="wishlist-card-price">₹{art.price?.toLocaleString()}</span>
                   <button
                     className="wishlist-add-cart-btn"
                     onClick={() => onAddToCart(art)}
