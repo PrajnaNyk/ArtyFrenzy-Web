@@ -11,6 +11,8 @@ import java.util.Optional;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByUserIdOrderByCreatedAtDesc(Long userId);
+    
+    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.items i LEFT JOIN FETCH i.artwork WHERE o.razorpayOrderId = :razorpayOrderId")
     Optional<Order> findByRazorpayOrderId(String razorpayOrderId);
 
     long countByStatus(Order.OrderStatus status); 

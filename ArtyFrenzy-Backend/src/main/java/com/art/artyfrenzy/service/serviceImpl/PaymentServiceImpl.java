@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // ✅ ADDED
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -38,23 +39,19 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public Map<String, Object> createOrder(PaymentRequest request) {
         try {
-            // Safety checks
             if (request.getUserId() == null || request.getArtworkIds() == null || request.getTotalAmount() == null) {
                 throw new RuntimeException("Missing required payment fields.");
             }
 
-            // Create Razorpay order
             RazorpayClient razorpay = new RazorpayClient(razorpayKeyId, razorpayKeySecret);
 
             JSONObject orderRequest = new JSONObject();
-            // Amount in paise (multiply by 100) - use Math.round to avoid decimal issues
             orderRequest.put("amount", Math.round(request.getTotalAmount() * 100));
             orderRequest.put("currency", "INR");
             orderRequest.put("receipt", "order_" + System.currentTimeMillis());
 
             com.razorpay.Order razorpayOrder = razorpay.orders.create(orderRequest);
 
-            // Save order in DB
             User user = userRepository.findById(request.getUserId())
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -78,7 +75,6 @@ public class PaymentServiceImpl implements PaymentService {
             order.setItems(items);
             orderRepository.save(order);
 
-            // Return details needed by frontend
             Map<String, Object> response = new HashMap<>();
             response.put("razorpayOrderId", razorpayOrder.get("id"));
             response.put("amount", request.getTotalAmount());
@@ -87,7 +83,6 @@ public class PaymentServiceImpl implements PaymentService {
             return response;
 
         } catch (RazorpayException e) {
-            // This will now show the EXACT Razorpay error to the frontend!
             throw new RuntimeException("Razorpay Error: " + e.getMessage());
         } catch (Exception e) {
             throw new RuntimeException("Order creation failed: " + e.getMessage());
@@ -95,8 +90,9 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Transactional // ✅ ADDED: Ensures Order update and Artwork update happen together
     public Order verifyPayment(PaymentVerifyRequest request) throws Exception {
-        // Verify HMAC SHA256 signature
+        // 1. Verify HMAC SHA256 signature
         String payload = request.getRazorpayOrderId() + "|" + request.getRazorpayPaymentId();
         String generatedSignature = hmacSHA256(payload, razorpayKeySecret);
 
@@ -104,14 +100,28 @@ public class PaymentServiceImpl implements PaymentService {
             throw new RuntimeException("Payment verification failed! Invalid signature.");
         }
 
-        // Update order status to PAID
+        // 2. Fetch order (Must fetch items and artworks to avoid LazyLoading errors)
         Order order = orderRepository.findByRazorpayOrderId(request.getRazorpayOrderId())
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
+        // 3. Update order status to PAID
         order.setRazorpayPaymentId(request.getRazorpayPaymentId());
         order.setRazorpaySignature(request.getRazorpaySignature());
         order.setStatus(Order.OrderStatus.PAID);
 
+        // ✅ 4. NEW: Mark all artworks in this order as "Sold"
+        List<OrderItem> items = order.getItems();
+        if (items != null) {
+            for (OrderItem item : items) {
+                Artwork artwork = item.getArtwork();
+                if (artwork != null) {
+                    artwork.setStatus("Sold"); // Change from "Available" to "Sold"
+                    artworkRepository.save(artwork);
+                }
+            }
+        }
+
+        // 5. Save the updated order
         return orderRepository.save(order);
     }
 
